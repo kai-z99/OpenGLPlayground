@@ -6,8 +6,9 @@
 
 #include <assimp/mesh.h>
 
-#include "../ShareLib/Shader.h"
-#include "../ShareLib/Camera.h"
+//#include "../ShareLib/Shader.h"
+#include "Shader.h"
+#include "Camera.h"
 #include "stb_image.h"
 
 #include <iostream>

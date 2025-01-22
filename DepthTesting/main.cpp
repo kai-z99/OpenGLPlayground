@@ -1,13 +1,13 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <stb_image.h>
+#include <stb_image.h> //in shareLIB
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "../ShareLib/Shader.h"
-#include "../ShareLib/Camera.h"
+#include "Shader.h" //sharelib is a refrence to this project, no need for path
+#include "Camera.h"
 
 #include <iostream>
 #include <vector>
@@ -176,7 +176,7 @@ int main()
         float scale; //0.8,1.2
     };
     std::vector<Grass> grasses;
-    const int numGrass = 60;
+    const int numGrass = 200;
 
     for (int i = 0; i < numGrass; i++)
     {
@@ -270,7 +270,7 @@ int main()
 
         // render
         // ------
-        glClearColor(0.4f, 0.4f, 0.4f, 0.4f);
+        glClearColor(0.71, 0.9f, 0.949f, 0.4f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         glm::mat4 model = glm::mat4(1.0f);
