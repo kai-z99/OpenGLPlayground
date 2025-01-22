@@ -19,6 +19,11 @@ void main()
     //FragColor = vec4(vec3(depth), 1.0);
     //FragColor = vec4(vec3(gl_FragCoord.z), 1.0);
 
-    FragColor = vec4(texture(texture1, TexCoord).rgb, 1.0);
+    //FragColor = vec4(texture(texture1, TexCoord).rgb, 1.0);
+
+    vec4 col = texture(texture1, TexCoord);
+    if (col.a < 0.1) discard;
+
+    FragColor = col;
 
 }

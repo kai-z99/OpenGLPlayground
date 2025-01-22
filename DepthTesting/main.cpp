@@ -10,6 +10,8 @@
 #include "../ShareLib/Camera.h"
 
 #include <iostream>
+#include <vector>
+#include <random>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -30,6 +32,13 @@ bool firstMouse = true;
 // timing
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
+
+std::random_device rd;
+std::mt19937 gen(rd());
+std::uniform_int_distribution<> distr(-100, 100);
+std::uniform_int_distribution<> distrS(8,12);
+std::uniform_int_distribution<> distrR(0, 90);
+
 
 int main()
 {
@@ -77,11 +86,11 @@ int main()
     //glEnable(GL_POLYGON_OFFSET_FILL);
     glEnable(GL_STENCIL_TEST);
     glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-   
+    glStencilOp(GL_KEEP, GL_REPLACE, GL_REPLACE);
+
     //glPolygonOffset(1.0f, 1.0f);
     //glDepthFunc(GL_LESS); // always pass the depth test (same effect as glDisable(GL_DEPTH_TEST))
-    
+
 
     // build and compile shaders
     // -------------------------
@@ -146,12 +155,54 @@ int main()
         -5.0f, -0.5f, -5.0f,  0.0f, 2.0f,
          5.0f, -0.5f, -5.0f,  2.0f, 2.0f
     };
+
+    //size = 1x1
+    float grassVertices[] = {
+        //position           //texcoord
+       -0.5f, -0.5f, 0.0f,  0.0f, 0.0f,  //bl
+        0.5f, -0.5f, 0.0f,  1.0f, 0.0f,  //br
+        0.5f,  0.5f, 0.0f,  1.0f, 1.0f,  //tr
+
+        0.5f, 0.5f, 0.0f,  1.0f, 1.0f,  //tr
+       -0.5f, 0.5f, 0.0f,  0.0f, 1.0f,   //tl
+       -0.5f,-0.5f, 0.0f,  0.0f, 0.0f,  //bl
+
+    };
+
+    struct Grass
+    {
+        glm::vec3 pos;  //-5,5
+        float rot;  //0, 90 (grass is a quad)
+        float scale; //0.8,1.2
+    };
+    std::vector<Grass> grasses;
+    const int numGrass = 60;
+
+    for (int i = 0; i < numGrass; i++)
+    {
+        glm::vec3 pos = glm::vec3(distr(gen) / 20.0f, 0.0f, distr(gen) / 20.0f);
+        float rot = distrR(gen);
+        float scale = distrS(gen) / 10.0f;
+
+        Grass grass = Grass();
+        grass.pos = pos;
+        grass.rot = rot;
+        grass.scale = scale;
+
+        grasses.push_back(grass);
+        //range of gen is -100,100 . so /20 puts in the range -5,5, the size of the floor
+    }
+
+    
+
     // cube VAO
     unsigned int cubeVAO, cubeVBO;
     glGenVertexArrays(1, &cubeVAO);
     glGenBuffers(1, &cubeVBO);
+
     glBindVertexArray(cubeVAO);
     glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
+
     glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), &cubeVertices, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
@@ -162,19 +213,41 @@ int main()
     unsigned int planeVAO, planeVBO;
     glGenVertexArrays(1, &planeVAO);
     glGenBuffers(1, &planeVBO);
+
     glBindVertexArray(planeVAO);
     glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
+
     glBufferData(GL_ARRAY_BUFFER, sizeof(planeVertices), &planeVertices, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glBindVertexArray(0);
+    //grass 
+    unsigned int grassVAO, grassVBO;
+    glGenVertexArrays(1, &grassVAO);
+    glGenBuffers(1, &grassVBO);
+
+    glBindVertexArray(grassVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, grassVBO);
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(grassVertices), &grassVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0); //pos
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1); //tex
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glBindVertexArray(0);
+
+
+
+
 
     // load textures
     // -------------
     unsigned int cubeTexture = loadTexture("../ShareLib/Resources/container.jpg");
-    unsigned int floorTexture = loadTexture("../ShareLib/Resources/minion.jpg");
+    unsigned int floorTexture = loadTexture("../ShareLib/Resources/ground.jpg");
+    stbi_set_flip_vertically_on_load(true);
+    unsigned int grassTexture = loadTexture("../ShareLib/Resources/grass.png");
 
     // shader configuration
     // --------------------
@@ -205,9 +278,11 @@ int main()
         glm::mat4 projection = glm::perspective(glm::radians(camera.zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         
         shader.use();
-        glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-        glStencilMask(0x00);
+
+        //STENCIL: DONT WRITE TO THE BUFFER. JUST RENDER THE FLOOR.
+        glStencilFunc(GL_NOTEQUAL, 1, 0xFF); //doesnt really matter
+        //glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE); //doesnt really matter
+        glStencilMask(0x00); //Disable writing to stencil buffer
 
         // floor
         glBindVertexArray(planeVAO);
@@ -216,7 +291,37 @@ int main()
         glDrawArrays(GL_TRIANGLES, 0, 6);
         glBindVertexArray(0);
 
-        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+        //grass
+        glBindVertexArray(grassVAO);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, grassTexture);
+
+        for (int i = 0; i < grasses.size(); i++)
+        {
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, grasses[i].pos);
+            model = glm::scale(model, glm::vec3(grasses[i].scale, grasses[i].scale, grasses[i].scale));
+            model = glm::rotate(model, glm::radians(grasses[i].rot), glm::vec3(0.0f, 1.0f, 0.0f));
+
+
+            glUniformMatrix4fv(glGetUniformLocation(shader.ID, "model"), 1, GL_FALSE, &model[0][0]);
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+
+            model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+            glUniformMatrix4fv(glGetUniformLocation(shader.ID, "model"), 1, GL_FALSE, &model[0][0]);
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+
+        }
+        glBindVertexArray(0);
+
+        
+
+        //STENCIL: WRITE ALL 1s TO THE BUFFER. AND DRAW THE CUBES. SO EACH PIXEL OF THE CUBE IS A 1.
+        //glStencilOp(GL_KEEP, GL_REPLACE, GL_REPLACE); //third arg means when stencil and depth passes. Rn stencil always passes.
+        // second arg is when stencil passes but depth fails. Turn this to replace to it will make each pixel a 1 even if it fails depth test. THis prevents
+        // the whole cube to be highlighted when the cube is obstructed.
+        // (set at top of file)
+
         glStencilFunc(GL_ALWAYS, 1, 0xFF); // all fragments should pass the stencil test
         glStencilMask(0xFF); // enable writing to the stencil buffer
         
@@ -226,6 +331,7 @@ int main()
         glBindVertexArray(cubeVAO);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, cubeTexture);
+        model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(-1.0f, 0.001f, -1.0f));
         glUniformMatrix4fv(glGetUniformLocation(shader.ID, "model"), 1, GL_FALSE, &model[0][0]);
         glDrawArrays(GL_TRIANGLES, 0, 36);
@@ -234,10 +340,15 @@ int main()
         glUniformMatrix4fv(glGetUniformLocation(shader.ID, "model"), 1, GL_FALSE, &model[0][0]);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
-        glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+
+
+        //STENCIL: NOW DISABLE WRITING TO THE BUFFER. NOW DRAW SLIGHTLY LARGER GREEN CUBES. 
+        //SINCE THE BUFFER IS FILLED WITH 1s WHERE THE OG CUBES ARE, IT WILL NOT DRAW ON THE OG CUBES, ONLY THE OUTER PART OF THE 
+        //NEW CUBES.
+        glStencilFunc(GL_NOTEQUAL, 1, 0xFF); //Pass the stencil test when the value is NOT 1. (eg. it will fail when its ontop of the orignal cubes )
         glStencilMask(0x00); // disable writing to the stencil buffer
-        glDisable(GL_DEPTH_TEST);
-        outlineShader.use();
+        //glDisable(GL_DEPTH_TEST); //disble depth test if u want outlines to show thorugh everyhting (i dont bcuz i dont want it to draww over grass)
+        outlineShader.use(); //light green
 
         glUniformMatrix4fv(glGetUniformLocation(outlineShader.ID, "view"), 1, GL_FALSE, &view[0][0]);
         glUniformMatrix4fv(glGetUniformLocation(outlineShader.ID, "projection"), 1, GL_FALSE, &projection[0][0]);
@@ -260,6 +371,9 @@ int main()
         glStencilFunc(GL_ALWAYS, 1, 0xFF);
         glEnable(GL_DEPTH_TEST);
 
+        
+
+        
         
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
@@ -354,12 +468,22 @@ unsigned int loadTexture(char const* path)
         else if (nrComponents == 4)
             format = GL_RGBA;
 
+
         glBindTexture(GL_TEXTURE_2D, textureID);
         glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        if (format == GL_RGBA)
+        {
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        }
+        else
+        {
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        }
+        
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 

@@ -212,7 +212,7 @@ int main()
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     //glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
     glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), cubeVertices, GL_STATIC_DRAW); //for VBO
-    
+   
     //NOW configure the vertex buffer attributes.-=---------------------------------------
     // position attribute (index 0)
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)0); //in vs1: layout (location = 0) in vec3 aPos;
