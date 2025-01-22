@@ -1,4 +1,4 @@
-Collection of openGL VS projects
+# Collection of openGL VS projects
 
 Basic: Phong lighting with multiple light sources. Spot lights with ambient factor.
 
