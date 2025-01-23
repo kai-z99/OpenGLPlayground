@@ -20,7 +20,7 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)stb_image.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="$(MSBuildThisFileDirectory)..\DepthTesting\glad\glad.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)glad\glad.c" />
     <ClCompile Include="$(MSBuildThisFileDirectory)stb_image.cpp" />
   </ItemGroup>
 </Project>

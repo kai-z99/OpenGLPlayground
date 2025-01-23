@@ -24,5 +24,6 @@
     <None Include="1.2.depth_testing.glsl" />
     <None Include="shaderSingleColor.glsl" />
     <None Include="shaderSingleColorV.glsl" />
+    <None Include="windowShaderF.glsl" />
   </ItemGroup>
 </Project>

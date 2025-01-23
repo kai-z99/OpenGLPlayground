@@ -87,6 +87,8 @@ int main()
     glEnable(GL_STENCIL_TEST);
     glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
     glStencilOp(GL_KEEP, GL_REPLACE, GL_REPLACE);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); //source, destination
 
     //glPolygonOffset(1.0f, 1.0f);
     //glDepthFunc(GL_LESS); // always pass the depth test (same effect as glDisable(GL_DEPTH_TEST))
@@ -96,6 +98,7 @@ int main()
     // -------------------------
     Shader shader("1.2.depth_testingV.glsl", "1.2.depth_testing.glsl");
     Shader outlineShader("shaderSingleColorV.glsl", "shaderSingleColor.glsl");
+    Shader windowShader("1.2.depth_testingV.glsl", "windowShaderF.glsl");
 
 
 
@@ -246,8 +249,10 @@ int main()
     // -------------
     unsigned int cubeTexture = loadTexture("../ShareLib/Resources/container.jpg");
     unsigned int floorTexture = loadTexture("../ShareLib/Resources/ground.jpg");
+    unsigned int windowTexture = loadTexture("../ShareLib/Resources/transparent_window.png");
     stbi_set_flip_vertically_on_load(true);
     unsigned int grassTexture = loadTexture("../ShareLib/Resources/grass.png");
+
 
     // shader configuration
     // --------------------
@@ -333,10 +338,12 @@ int main()
         glBindTexture(GL_TEXTURE_2D, cubeTexture);
         model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(-1.0f, 0.001f, -1.0f));
+        model = glm::rotate(model, glm::radians(25.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         glUniformMatrix4fv(glGetUniformLocation(shader.ID, "model"), 1, GL_FALSE, &model[0][0]);
         glDrawArrays(GL_TRIANGLES, 0, 36);
         model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
+        model = glm::rotate(model, glm::radians(-11.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         glUniformMatrix4fv(glGetUniformLocation(shader.ID, "model"), 1, GL_FALSE, &model[0][0]);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
@@ -359,11 +366,13 @@ int main()
         model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(-1.0f, 0.001f, -1.0f));
         model = glm::scale(model, glm::vec3(1.1f, 1.1f, 1.1f));
+        model = glm::rotate(model, glm::radians(25.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         glUniformMatrix4fv(glGetUniformLocation(outlineShader.ID, "model"), 1, GL_FALSE, &model[0][0]);
         glDrawArrays(GL_TRIANGLES, 0, 36);
         model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
         model = glm::scale(model, glm::vec3(1.1f, 1.1f, 1.1f));
+        model = glm::rotate(model, glm::radians(-11.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         glUniformMatrix4fv(glGetUniformLocation(outlineShader.ID, "model"), 1, GL_FALSE, &model[0][0]);
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
@@ -371,9 +380,28 @@ int main()
         glStencilFunc(GL_ALWAYS, 1, 0xFF);
         glEnable(GL_DEPTH_TEST);
 
-        
+        //windows last
+        windowShader.use();
+        model = glm::mat4(1.0f); //0,0
+        model = glm::translate(model, glm::vec3(-1.0f, 0.0f, 1.0f));
+        glUniformMatrix4fv(glGetUniformLocation(windowShader.ID, "model"), 1, GL_FALSE, &model[0][0]);
+        glUniformMatrix4fv(glGetUniformLocation(windowShader.ID, "view"), 1, GL_FALSE, &view[0][0]);
+        glUniformMatrix4fv(glGetUniformLocation(windowShader.ID, "projection"), 1, GL_FALSE, &projection[0][0]);
 
+        glBindVertexArray(grassVAO); //works for this tbh just a square
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, windowTexture);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+
+        model = glm::mat4(1.0f); //0,0
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 2.0f));
+        model = glm::rotate(model, glm::radians(35.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         
+        glBindVertexArray(cubeVAO);
+        glUniformMatrix4fv(glGetUniformLocation(windowShader.ID, "model"), 1, GL_FALSE, &model[0][0]);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+
         
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
@@ -497,3 +525,6 @@ unsigned int loadTexture(char const* path)
 
     return textureID;
 }
+
+//Note for sharelib: originally you have to have the folder glad/glad.c in the same directory as main. We move that to
+//shareLib effectively simulating that but not having to copy the folder to every project. Saem goes for stb_image and custom headers like Shader or Mesh etc.
