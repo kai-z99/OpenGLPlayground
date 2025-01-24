@@ -12,6 +12,7 @@
 #include <iostream>
 #include <vector>
 #include <random>
+#include <map>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
@@ -196,6 +197,12 @@ int main()
         //range of gen is -100,100 . so /20 puts in the range -5,5, the size of the floor
     }
 
+
+    std::vector<glm::vec3> windowPositions;
+    windowPositions.push_back(glm::vec3(-1.0f, 0.0f, 1.0f));
+    windowPositions.push_back(glm::vec3(0.0f, 0.0f, 2.0f));
+
+    std::map<float, glm::vec3> windowDistances;
     
 
     // cube VAO
@@ -378,31 +385,37 @@ int main()
 
         glStencilMask(0xFF);
         glStencilFunc(GL_ALWAYS, 1, 0xFF);
-        glEnable(GL_DEPTH_TEST);
+        //glEnable(GL_DEPTH_TEST);
 
         //windows last
+
+        windowDistances.clear();
+        for (const glm::vec3& pos : windowPositions)
+        {
+            float distance = glm::length(pos - camera.position);
+            windowDistances[distance] = pos; //map stores from lowest to highest distance
+        }
+
         windowShader.use();
-        model = glm::mat4(1.0f); //0,0
-        model = glm::translate(model, glm::vec3(-1.0f, 0.0f, 1.0f));
-        glUniformMatrix4fv(glGetUniformLocation(windowShader.ID, "model"), 1, GL_FALSE, &model[0][0]);
         glUniformMatrix4fv(glGetUniformLocation(windowShader.ID, "view"), 1, GL_FALSE, &view[0][0]);
         glUniformMatrix4fv(glGetUniformLocation(windowShader.ID, "projection"), 1, GL_FALSE, &projection[0][0]);
-
         glBindVertexArray(grassVAO); //works for this tbh just a square
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, windowTexture);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-
-        model = glm::mat4(1.0f); //0,0
-        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 2.0f));
-        model = glm::rotate(model, glm::radians(35.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        for (std::map<float, glm::vec3>::reverse_iterator it = windowDistances.rbegin(); it != windowDistances.rend(); ++it)
+        {
+            model = glm::mat4(1.0f); //0,0
+            model = glm::translate(model, it->second);
+            glUniformMatrix4fv(glGetUniformLocation(windowShader.ID, "model"), 1, GL_FALSE, &model[0][0]);
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+        }
         
-        glBindVertexArray(cubeVAO);
-        glUniformMatrix4fv(glGetUniformLocation(windowShader.ID, "model"), 1, GL_FALSE, &model[0][0]);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-
-
         
+
+        //glDisable(GL_DEPTH_TEST);
+        
+        
+        //glEnable(GL_DEPTH_TEST);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
