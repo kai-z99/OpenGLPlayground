@@ -90,6 +90,7 @@ int main()
     glStencilOp(GL_KEEP, GL_REPLACE, GL_REPLACE);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); //source, destination
+    glEnable(GL_CULL_FACE);
 
     //glPolygonOffset(1.0f, 1.0f);
     //glDepthFunc(GL_LESS); // always pass the depth test (same effect as glDisable(GL_DEPTH_TEST))
@@ -105,49 +106,49 @@ int main()
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
-    float cubeVertices[] = {
-        // positions          // texture Coords
-        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-         0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-
-        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-         0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+    float cubeVertices[] = { //CCW WINDING ORDER
+    // Back face
+    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, // Bottom-left
+    0.5f,  0.5f, -0.5f,  1.0f, 1.0f, // top-right
+    0.5f, -0.5f, -0.5f,  1.0f, 0.0f, // bottom-right         
+    0.5f,  0.5f, -0.5f,  1.0f, 1.0f, // top-right
+    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f, // bottom-left
+    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f, // top-left
+    // Front face
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, // bottom-left
+    0.5f, -0.5f,  0.5f,  1.0f, 0.0f, // bottom-right
+    0.5f,  0.5f,  0.5f,  1.0f, 1.0f, // top-right
+    0.5f,  0.5f,  0.5f,  1.0f, 1.0f, // top-right
+    -0.5f,  0.5f,  0.5f,  0.0f, 1.0f, // top-left
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, // bottom-left
+    // Left face
+    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f, // top-right
+    -0.5f,  0.5f, -0.5f,  1.0f, 1.0f, // top-left
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f, // bottom-left
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f, // bottom-left
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, // bottom-right
+    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f, // top-right
+    // Right face
+    0.5f,  0.5f,  0.5f,  1.0f, 0.0f, // top-left
+    0.5f, -0.5f, -0.5f,  0.0f, 1.0f, // bottom-right
+    0.5f,  0.5f, -0.5f,  1.0f, 1.0f, // top-right         
+    0.5f, -0.5f, -0.5f,  0.0f, 1.0f, // bottom-right
+    0.5f,  0.5f,  0.5f,  1.0f, 0.0f, // top-left
+    0.5f, -0.5f,  0.5f,  0.0f, 0.0f, // bottom-left     
+    // Bottom face
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f, // top-right
+    0.5f, -0.5f, -0.5f,  1.0f, 1.0f, // top-left
+    0.5f, -0.5f,  0.5f,  1.0f, 0.0f, // bottom-left
+    0.5f, -0.5f,  0.5f,  1.0f, 0.0f, // bottom-left
+    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f, // bottom-right
+    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f, // top-right
+    // Top face
+    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f, // top-left
+    0.5f,  0.5f,  0.5f,  1.0f, 0.0f, // bottom-right
+    0.5f,  0.5f, -0.5f,  1.0f, 1.0f, // top-right     
+    0.5f,  0.5f,  0.5f,  1.0f, 0.0f, // bottom-right
+    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f, // top-left
+    -0.5f,  0.5f,  0.5f,  0.0f, 0.0f  // bottom-left  
     };
     float planeVertices[] = {
         // positions          // texture Coords (note we set these higher than 1 (together with GL_REPEAT as texture wrapping mode). this will cause the floor texture to repeat)
@@ -259,6 +260,7 @@ int main()
     unsigned int windowTexture = loadTexture("../ShareLib/Resources/transparent_window.png");
     stbi_set_flip_vertically_on_load(true);
     unsigned int grassTexture = loadTexture("../ShareLib/Resources/grass.png");
+    unsigned int treeTexture = loadTexture("../ShareLib/Resources/tree.png");
 
 
     // shader configuration
@@ -292,9 +294,11 @@ int main()
         shader.use();
 
         //STENCIL: DONT WRITE TO THE BUFFER. JUST RENDER THE FLOOR.
-        glStencilFunc(GL_NOTEQUAL, 1, 0xFF); //doesnt really matter
-        //glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE); //doesnt really matter
+        //glStencilFunc(GL_NOTEQUAL, 1, 0xFF); //doesnt really matter since its not gonna be cahnged
+        //glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE); //doesnt really matter since its not gonna be cahnged
         glStencilMask(0x00); //Disable writing to stencil buffer
+
+        glDisable(GL_CULL_FACE); //Cant cull non-closed shapes like plane or grass
 
         // floor
         glBindVertexArray(planeVAO);
@@ -337,6 +341,8 @@ int main()
         glStencilFunc(GL_ALWAYS, 1, 0xFF); // all fragments should pass the stencil test
         glStencilMask(0xFF); // enable writing to the stencil buffer
         
+        glEnable(GL_CULL_FACE); //cull cllosed shapes
+
         glUniformMatrix4fv(glGetUniformLocation(shader.ID, "view"), 1, GL_FALSE, &view[0][0]);
         glUniformMatrix4fv(glGetUniformLocation(shader.ID, "projection"), 1, GL_FALSE, &projection[0][0]);
         // cubes
@@ -375,24 +381,27 @@ int main()
         model = glm::scale(model, glm::vec3(1.1f, 1.1f, 1.1f));
         model = glm::rotate(model, glm::radians(25.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         glUniformMatrix4fv(glGetUniformLocation(outlineShader.ID, "model"), 1, GL_FALSE, &model[0][0]);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        glDrawArrays(GL_TRIANGLES, 0, 36); //cube 1
         model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(2.0f, 0.0f, 0.0f));
         model = glm::scale(model, glm::vec3(1.1f, 1.1f, 1.1f));
         model = glm::rotate(model, glm::radians(-11.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         glUniformMatrix4fv(glGetUniformLocation(outlineShader.ID, "model"), 1, GL_FALSE, &model[0][0]);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        glDrawArrays(GL_TRIANGLES, 0, 36); //cube 2
 
         glStencilMask(0xFF);
         glStencilFunc(GL_ALWAYS, 1, 0xFF);
         //glEnable(GL_DEPTH_TEST);
 
-        //windows last
-
+        //windows last----------
         windowDistances.clear();
+
+        glDisable(GL_CULL_FACE); //Cant cull non-closed shapes like window
+
+        //put distances as keys in a map which will be sorted. value is the position
         for (const glm::vec3& pos : windowPositions)
         {
-            float distance = glm::length(pos - camera.position);
+            float distance = glm::dot(pos - camera.position, pos - camera.position); // distance^2
             windowDistances[distance] = pos; //map stores from lowest to highest distance
         }
 
@@ -402,6 +411,9 @@ int main()
         glBindVertexArray(grassVAO); //works for this tbh just a square
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, windowTexture);
+
+        //O(n^2) time complexity...
+        //Draw from furthest away to closest window
         for (std::map<float, glm::vec3>::reverse_iterator it = windowDistances.rbegin(); it != windowDistances.rend(); ++it)
         {
             model = glm::mat4(1.0f); //0,0

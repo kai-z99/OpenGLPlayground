@@ -9,6 +9,12 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DepthTesting", "DepthTestin
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ShareLib", "ShareLib\ShareLib.vcxitems", "{753ACBCF-6D1C-4D92-A691-67C99B078045}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Billboard", "Billboard\Billboard.vcxproj", "{6E9D1220-50C4-47DC-ACDE-48FB01164BE6}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PostProcessing", "PostProcessing\PostProcessing.vcxproj", "{D3D05B59-68CD-4FD5-AC40-C26E0A44940D}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Template", "Template\Template.vcxproj", "{3F232EE4-DE84-4472-BC29-D7A4480B538C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -33,6 +39,30 @@ Global
 		{59CF8DCF-6B4B-4DE9-A2BD-04F34A5C3F1B}.Release|x64.Build.0 = Release|x64
 		{59CF8DCF-6B4B-4DE9-A2BD-04F34A5C3F1B}.Release|x86.ActiveCfg = Release|Win32
 		{59CF8DCF-6B4B-4DE9-A2BD-04F34A5C3F1B}.Release|x86.Build.0 = Release|Win32
+		{6E9D1220-50C4-47DC-ACDE-48FB01164BE6}.Debug|x64.ActiveCfg = Debug|x64
+		{6E9D1220-50C4-47DC-ACDE-48FB01164BE6}.Debug|x64.Build.0 = Debug|x64
+		{6E9D1220-50C4-47DC-ACDE-48FB01164BE6}.Debug|x86.ActiveCfg = Debug|Win32
+		{6E9D1220-50C4-47DC-ACDE-48FB01164BE6}.Debug|x86.Build.0 = Debug|Win32
+		{6E9D1220-50C4-47DC-ACDE-48FB01164BE6}.Release|x64.ActiveCfg = Release|x64
+		{6E9D1220-50C4-47DC-ACDE-48FB01164BE6}.Release|x64.Build.0 = Release|x64
+		{6E9D1220-50C4-47DC-ACDE-48FB01164BE6}.Release|x86.ActiveCfg = Release|Win32
+		{6E9D1220-50C4-47DC-ACDE-48FB01164BE6}.Release|x86.Build.0 = Release|Win32
+		{D3D05B59-68CD-4FD5-AC40-C26E0A44940D}.Debug|x64.ActiveCfg = Debug|x64
+		{D3D05B59-68CD-4FD5-AC40-C26E0A44940D}.Debug|x64.Build.0 = Debug|x64
+		{D3D05B59-68CD-4FD5-AC40-C26E0A44940D}.Debug|x86.ActiveCfg = Debug|Win32
+		{D3D05B59-68CD-4FD5-AC40-C26E0A44940D}.Debug|x86.Build.0 = Debug|Win32
+		{D3D05B59-68CD-4FD5-AC40-C26E0A44940D}.Release|x64.ActiveCfg = Release|x64
+		{D3D05B59-68CD-4FD5-AC40-C26E0A44940D}.Release|x64.Build.0 = Release|x64
+		{D3D05B59-68CD-4FD5-AC40-C26E0A44940D}.Release|x86.ActiveCfg = Release|Win32
+		{D3D05B59-68CD-4FD5-AC40-C26E0A44940D}.Release|x86.Build.0 = Release|Win32
+		{3F232EE4-DE84-4472-BC29-D7A4480B538C}.Debug|x64.ActiveCfg = Debug|x64
+		{3F232EE4-DE84-4472-BC29-D7A4480B538C}.Debug|x64.Build.0 = Debug|x64
+		{3F232EE4-DE84-4472-BC29-D7A4480B538C}.Debug|x86.ActiveCfg = Debug|Win32
+		{3F232EE4-DE84-4472-BC29-D7A4480B538C}.Debug|x86.Build.0 = Debug|Win32
+		{3F232EE4-DE84-4472-BC29-D7A4480B538C}.Release|x64.ActiveCfg = Release|x64
+		{3F232EE4-DE84-4472-BC29-D7A4480B538C}.Release|x64.Build.0 = Release|x64
+		{3F232EE4-DE84-4472-BC29-D7A4480B538C}.Release|x86.ActiveCfg = Release|Win32
+		{3F232EE4-DE84-4472-BC29-D7A4480B538C}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -41,8 +71,10 @@ Global
 		SolutionGuid = {4D0213C8-C38C-4D6F-B8BE-A7E394F1E49C}
 	EndGlobalSection
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		ShareLib\ShareLib.vcxitems*{3f232ee4-de84-4472-bc29-d7a4480b538c}*SharedItemsImports = 4
 		ShareLib\ShareLib.vcxitems*{59cf8dcf-6b4b-4de9-a2bd-04f34a5c3f1b}*SharedItemsImports = 4
 		ShareLib\ShareLib.vcxitems*{753acbcf-6d1c-4d92-a691-67c99b078045}*SharedItemsImports = 9
 		ShareLib\ShareLib.vcxitems*{9af37363-c6a3-44c1-b834-61909905181d}*SharedItemsImports = 4
+		ShareLib\ShareLib.vcxitems*{d3d05b59-68cd-4fd5-ac40-c26e0a44940d}*SharedItemsImports = 4
 	EndGlobalSection
 EndGlobal
