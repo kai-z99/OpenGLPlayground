@@ -5,7 +5,7 @@ in vec2 TexCoords;
 
 uniform sampler2D screenTexture;
 
-const float offset = 1.0f / 300.0f;
+const float offset = 1.0f / 100.0f;
 
 void main()
 { 
@@ -34,11 +34,39 @@ void main()
         vec2( offset, -offset)  // bottom-right   
     );
 
+    //blur matrix
+    /*
     float convolutionMatrix[9] = float[](
         1.0/16, 2.0/16,  1.0/16,
         2.0/16,  4.0/16, 2.0/16,
         1.0/16, 2.0/16, 1.0/16
     );
+    */
+
+    //cool neon edge detection
+    /*
+    float convolutionMatrix[9] = float[](
+        1, 0, 1,
+        0, -4, 0,
+        1, 0, 1
+    );
+    */
+
+    // Slight blur convolution matrix
+    float convolutionMatrix[9] = float[](
+    0.0, 0.0625, 0.0,
+    0.0625, 0.75, 0.0625,
+    0.0, 0.0625, 0.0
+);
+
+    /*
+    // sobel
+    float convolutionMatrix[9] = float[](
+        -2, -1, 0,
+        -1,  1, 1,
+        0, 1, 2
+    );
+    */
 
     vec3 sampleTex[9];
 
@@ -53,7 +81,15 @@ void main()
         col += sampleTex[i] * convolutionMatrix[i];
     }
 
-    FragColor = vec4(col, 1.0f);
+    //some cool vhs stuff
+    vec2 redShift = vec2(offset, 0.0); // Shift red to the right
+    vec2 blueShift = vec2(-offset, 0.0); // Shift blue to the left
+
+    float r = texture(screenTexture, TexCoords.st + redShift).r;
+    float g = col.g; // keep green channel from the blurred image
+    float b = texture(screenTexture, TexCoords.st + blueShift).b;
+
+    FragColor = vec4(vec3(r,g,b), 1.0f);
 
 
 
