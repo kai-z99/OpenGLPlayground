@@ -87,6 +87,7 @@ int main()
     // build and compile shaders
     // -------------------------
     Shader shader("vs1.glsl", "fs1.glsl");
+    Shader screenShader("vsQ.glsl", "fsQ.glsl");
 
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
@@ -159,8 +160,32 @@ int main()
 
     };
 
+    //screen size
+    float quadVertices[] = {
+        // positions   // texCoords
+        -1.0f,  1.0f,  0.0f, 1.0f,
+        -1.0f, -1.0f,  0.0f, 0.0f,
+         1.0f, -1.0f,  1.0f, 0.0f,
 
-    // cube VAO
+        -1.0f,  1.0f,  0.0f, 1.0f,
+         1.0f, -1.0f,  1.0f, 0.0f,
+         1.0f,  1.0f,  1.0f, 1.0f
+    };
+
+    //top left corner rear view mirror
+    float mirrorVertices[] = {
+        // position        texCoords
+       -1.0f, 1.0f,       0.0f, 1.0f,  //tl
+       -1.0f, 0.5f,       0.0f, 0.0f,  //bl
+       -0.3f, 0.5f,       1.0f, 0.0f,  //br
+
+       -0.3f, 0.5f,       1.0f, 0.0f,  //br
+       -0.3f, 1.0f,       1.0f, 1.0f,  //tr
+       -1.0f, 1.0f,       0.0f, 1.0f,  //tl
+    };
+
+
+    // cube VAO--------------------------------------------------
     unsigned int cubeVAO, cubeVBO;
     glGenVertexArrays(1, &cubeVAO);
     glGenBuffers(1, &cubeVBO);
@@ -174,7 +199,8 @@ int main()
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glBindVertexArray(0);
-    // plane VAO
+
+    // plane VAO--------------------------------------------------
     unsigned int planeVAO, planeVBO;
     glGenVertexArrays(1, &planeVAO);
     glGenBuffers(1, &planeVBO);
@@ -188,7 +214,8 @@ int main()
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glBindVertexArray(0);
-    //grass 
+
+    //grass vao --------------------------------------------------
     unsigned int squareVAO, squareVBO;
     glGenVertexArrays(1, &squareVAO);
     glGenBuffers(1, &squareVBO);
@@ -202,6 +229,94 @@ int main()
     glEnableVertexAttribArray(1); //tex
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glBindVertexArray(0);
+
+    //quad vao --------------------------------------------------
+    unsigned int quadVAO, quadVBO;
+    glGenVertexArrays(1, &quadVAO);
+    glGenBuffers(1, &quadVBO);
+
+    glBindVertexArray(quadVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0); //pos
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1); //tex
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+    glBindVertexArray(0);
+
+    //rear view mirrorvao  --------------------------------------------------
+    unsigned int mirrorVAO, mirrorVBO;
+    glGenVertexArrays(1, &mirrorVAO);
+    glGenBuffers(1, &mirrorVBO);
+
+    glBindVertexArray(mirrorVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, mirrorVBO);
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(mirrorVertices), &mirrorVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0); //pos
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(1); //tex
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+    glBindVertexArray(0);
+
+    //Frame buffer for main scene--------------------------------------------
+    //create and bind framebuffer
+    unsigned int framebuffer;
+    glGenFramebuffers(1, &framebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+    //gen texture
+    unsigned int textureColorBuffer;
+    glGenTextures(1, &textureColorBuffer);
+    glBindTexture(GL_TEXTURE_2D, textureColorBuffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 800, 600, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    //attach colorBuffer
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorBuffer, 0);
+
+    //gen renderBuffer for depth/stencil
+    unsigned int rbo;
+    glGenRenderbuffers(1, &rbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, 800,600); //allocate memory 
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+    //generate framebuffer
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+
+    //check if it succeeded
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        std::cout << "ERROR::FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    // Framebuffer for the mirror view-----------------------------------------------
+    unsigned int mirrorFramebuffer;
+    glGenFramebuffers(1, &mirrorFramebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, mirrorFramebuffer);
+
+    unsigned int mirrorTextureColorbuffer;
+    glGenTextures(1, &mirrorTextureColorbuffer);
+    glBindTexture(GL_TEXTURE_2D, mirrorTextureColorbuffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mirrorTextureColorbuffer, 0);
+
+    unsigned int mirrorRBO;
+    glGenRenderbuffers(1, &mirrorRBO);
+    glBindRenderbuffer(GL_RENDERBUFFER, mirrorRBO);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, mirrorRBO);
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        std::cout << "ERROR::MIRROR_FRAMEBUFFER:: Framebuffer is not complete!" << std::endl;
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 
     // load textures
     // -------------
@@ -228,9 +343,13 @@ int main()
         processInput(window);
 
         // render
-        // ------
+        //----------------------------------------------------------
+        //Render the normal scene on its framebuffer
+        //----------------------------------------------------------
+        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer); //off screen render
         glClearColor(0.71, 0.9f, 0.949f, 0.4f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        glEnable(GL_DEPTH_TEST);
 
         //PLANE----------------------------------------------------
         shader.use();
@@ -249,7 +368,6 @@ int main()
 
         glDrawArrays(GL_TRIANGLES, 0, 6);
         glBindVertexArray(0);
-        //----------------------------------------------------------
 
         //CUBES----------------------------------------------------
         //shader.use();
@@ -267,11 +385,90 @@ int main()
 
         //Cube 2
         model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(1.0f, 0.0f, 0.0f));
         glUniformMatrix4fv(glGetUniformLocation(shader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
         glBindVertexArray(0);
+
+
+
         //----------------------------------------------------------
+        //Render the mirroed scene on its framebuffer
+        //----------------------------------------------------------
+        glBindFramebuffer(GL_FRAMEBUFFER, mirrorFramebuffer);
+        glEnable(GL_DEPTH_TEST);
+
+        glClearColor(0.71, 0.9f, 0.949f, 0.4f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        shader.use();
+
+        //create a lookAt matrix that points opposite to the normal one's
+        glm::vec3 mirrorFront = -camera.front; // reversed direction
+        glm::vec3 mirrorPos = camera.position;
+        glm::vec3 mirrorUp = camera.up;     // keep the same up-vector
+        glm::mat4 mirrorView = glm::lookAt(mirrorPos, mirrorPos + mirrorFront, mirrorUp);
+
+        //PLANE----------------------------------------------------
+        shader.use();
+        glDisable(GL_CULL_FACE); //Cant cull non-closed shapes like plane
+        glBindVertexArray(planeVAO);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, floorTexture);
+
+        model = glm::mat4(1.0f);
+        //view = camera.GetViewMatrix();
+        projection = glm::perspective(glm::radians(camera.zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+
+        glUniformMatrix4fv(glGetUniformLocation(shader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        glUniformMatrix4fv(glGetUniformLocation(shader.ID, "view"), 1, GL_FALSE, glm::value_ptr(mirrorView)); //use the reversed view
+        glUniformMatrix4fv(glGetUniformLocation(shader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glBindVertexArray(0);
+        //----------------------------------------------------------
+
+        //CUBES----------------------------------------------------
+        //shader.use();
+        glEnable(GL_CULL_FACE);
+        glBindVertexArray(cubeVAO);
+        //glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, cubeTexture);
+
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(-2.0f, 0.0f, -2.0f));
+        model = glm::rotate(model, glm::radians(20.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+        glUniformMatrix4fv(glGetUniformLocation(shader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        //Cube 2
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(1.0f, 0.0f, 0.0f));
+        glUniformMatrix4fv(glGetUniformLocation(shader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        glBindVertexArray(0);
+
+
+        //----------------------------------------------------------
+        //Finally, render quads
+        //----------------------------------------------------------
+        //back to default frameBuffer this will actually draw
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glDisable(GL_DEPTH_TEST); //will be drawing directly in front screen
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        screenShader.use();
+        glBindVertexArray(quadVAO); //whole screen
+        glBindTexture(GL_TEXTURE_2D, textureColorBuffer); // main scene framebuffer texture
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+
+        //rear view mirror
+        glBindVertexArray(mirrorVAO); //box in top left corner
+        glBindTexture(GL_TEXTURE_2D, mirrorTextureColorbuffer); // mirror framebuffer texture
+        glDrawArrays(GL_TRIANGLES, 0, 6);
 
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)

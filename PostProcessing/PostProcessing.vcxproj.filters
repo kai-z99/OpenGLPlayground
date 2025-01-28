@@ -22,5 +22,7 @@
   <ItemGroup>
     <None Include="fs1.glsl" />
     <None Include="vs1.glsl" />
+    <None Include="fsQ.glsl" />
+    <None Include="vsQ.glsl" />
   </ItemGroup>
 </Project>
