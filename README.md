@@ -1,5 +1,18 @@
-# Collection of openGL VS projects
+# Collection of OpenGL Visual Studio Projects
 
-Basic: Phong lighting with multiple light sources. Spot lights with ambient factor and attenuation.
+## Basic
+- **Phong Lighting**: multiple light sources.
+- **Spotlights**: ambient factors and attenuation
 
-Depth testing: Z buffer fighting, outlining with stencil buffer, grass terrain with alpha discarding, transparent windows (blending)
+---
+
+## Depth Testing
+- **Outlining**: using stencil buffer.
+- **Grass/Terrain Rendering**: semi-transparent textures.
+- **Transparent Windows**: blending for transparency.
+
+---
+
+## Post-Processing
+- **Framebuffers**: post-processing effects using convolution matrices.
+- **Rear View Camera**: multiple framebuffers for an auxiliary camera view.
