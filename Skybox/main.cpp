@@ -294,6 +294,8 @@ int main()
     unsigned int cubeTexture = loadTexture("../ShareLib/Resources/container2.png");
     unsigned int woodenCrateSpecularMapTexture = loadTexture("../ShareLib/Resources/container2_specular.png");
 
+
+
     //skybox
     
     
@@ -326,12 +328,23 @@ int main()
         "../ShareLib/Resources/skybox/front.jpg",
         "../ShareLib/Resources/skybox/back.jpg"
     };
+
     
     unsigned int cubeMapTexture = loadCubemap(faces);
     shader.use();
     shader.setInt("skybox", 0);
     shader.setInt("woodenTexture", 1);
     shader.setInt("woodenSpecularMap", 2);
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexture);
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, cubeTexture);
+
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, woodenCrateSpecularMapTexture);
+
     // render loop
     // -----------
     while (!glfwWindowShouldClose(window))
@@ -356,9 +369,8 @@ int main()
         shader.use();
         glEnable(GL_CULL_FACE);
         
-
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(0.0f, sinf(currentFrame), 0.0f));
+        model = glm::translate(model, glm::vec3(0.0f, sinf(currentFrame) * 0.5f, 0.0f));
         model = glm::rotate(model, glm::radians(currentFrame * 25.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
@@ -371,25 +383,17 @@ int main()
         glUniform3fv(glGetUniformLocation(shader.ID, "cameraPos"), 1, glm::value_ptr(camera.position) );
 
         glBindVertexArray(cubeVAO);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexture);
-
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, cubeTexture);
-
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, woodenCrateSpecularMapTexture);
-
         glDrawArrays(GL_TRIANGLES, 0, 36);
         glBindVertexArray(0);
         //----------------------------------------------------------
+        
         //SKYBOX--------------------------------------------------
         skyShader.use();
         glDisable(GL_CULL_FACE);
-        glDepthFunc(GL_LEQUAL);
+        glDepthFunc(GL_LEQUAL); //Since we set gl_Position = pos.xyww; , the depth is always 1.0. The value in the depth buffer max is 1.0 
+                                // so if we used GL_LESS, this would never pass since 1.0 is not less than 1.0. So we use LEQUAL to pass it.
 
         model = glm::mat4(1.0f);
-        //model = glm::scale(model, glm::vec3(2.0f, 2.0f, 2.0f));
         view = glm::mat4(glm::mat3(camera.GetViewMatrix()));
         projection = glm::perspective(glm::radians(camera.zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
@@ -398,14 +402,9 @@ int main()
         glUniformMatrix4fv(glGetUniformLocation(skyShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
         glBindVertexArray(skyboxVAO);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_CUBE_MAP, cubeMapTexture);
         glDrawArrays(GL_TRIANGLES, 0, 36);
-
         glDepthFunc(GL_LESS);
         glBindVertexArray(0);
-
-
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
