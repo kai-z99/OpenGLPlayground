@@ -12,11 +12,12 @@ uniform sampler2D woodenSpecularMap;
 
 
 void main()
-{      
+{    
+
     vec3 wood = vec3(texture(woodenTexture, TexCoords));
     float ratio = 1.00 / 1.52;
     vec3 I = normalize(Position - cameraPos);
-    vec3 R = refract(I, -normalize(Normal), ratio);
+    vec3 R = refract(I, normalize(Normal), ratio);
     if (texture(woodenSpecularMap, TexCoords).r == 0.0f) //not metal
     {
         FragColor = texture(woodenTexture, TexCoords);

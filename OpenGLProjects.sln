@@ -21,6 +21,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AntiAliasing", "AntiAliasin
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Instancing", "Instancing\Instancing.vcxproj", "{8C03FB36-2052-4F22-A595-5D72CE8A429E}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BlinnPhong", "BlinnPhong\BlinnPhong.vcxproj", "{BF942D57-5C61-4FBD-B1B2-DBD7845D441F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -93,6 +95,14 @@ Global
 		{8C03FB36-2052-4F22-A595-5D72CE8A429E}.Release|x64.Build.0 = Release|x64
 		{8C03FB36-2052-4F22-A595-5D72CE8A429E}.Release|x86.ActiveCfg = Release|Win32
 		{8C03FB36-2052-4F22-A595-5D72CE8A429E}.Release|x86.Build.0 = Release|Win32
+		{BF942D57-5C61-4FBD-B1B2-DBD7845D441F}.Debug|x64.ActiveCfg = Debug|x64
+		{BF942D57-5C61-4FBD-B1B2-DBD7845D441F}.Debug|x64.Build.0 = Debug|x64
+		{BF942D57-5C61-4FBD-B1B2-DBD7845D441F}.Debug|x86.ActiveCfg = Debug|Win32
+		{BF942D57-5C61-4FBD-B1B2-DBD7845D441F}.Debug|x86.Build.0 = Debug|Win32
+		{BF942D57-5C61-4FBD-B1B2-DBD7845D441F}.Release|x64.ActiveCfg = Release|x64
+		{BF942D57-5C61-4FBD-B1B2-DBD7845D441F}.Release|x64.Build.0 = Release|x64
+		{BF942D57-5C61-4FBD-B1B2-DBD7845D441F}.Release|x86.ActiveCfg = Release|Win32
+		{BF942D57-5C61-4FBD-B1B2-DBD7845D441F}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -107,6 +117,7 @@ Global
 		ShareLib\ShareLib.vcxitems*{7c3b8518-2df5-49d5-89b6-9d25215fffa8}*SharedItemsImports = 4
 		ShareLib\ShareLib.vcxitems*{9af37363-c6a3-44c1-b834-61909905181d}*SharedItemsImports = 4
 		ShareLib\ShareLib.vcxitems*{a5fc1db4-7b6e-438e-82a4-c7053a48bc79}*SharedItemsImports = 4
+		ShareLib\ShareLib.vcxitems*{bf942d57-5c61-4fbd-b1b2-dbd7845d441f}*SharedItemsImports = 4
 		ShareLib\ShareLib.vcxitems*{d3d05b59-68cd-4fd5-ac40-c26e0a44940d}*SharedItemsImports = 4
 	EndGlobalSection
 EndGlobal
