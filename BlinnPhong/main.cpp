@@ -32,8 +32,9 @@ bool firstMouse = true;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
-glm::vec3 lightPos = glm::vec3(-1.1f, 1.5f, 0.2f);
+glm::vec3 lightPos = glm::vec3(-2.0f, 4.0f, -1.0f);
 glm::vec3 lightCol = glm::vec3(1.0f, 1.0f, 1.0f);
+glm::vec3 lightDir = glm::vec3(1.0f, -1.0f, 1.0f);
 
 bool blinn = false;
 bool blinnKeyPressed = false;
@@ -89,12 +90,14 @@ int main()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); //source, destination
     glEnable(GL_CULL_FACE);
+    glEnable(GL_FRAMEBUFFER_SRGB);
 
 
     // build and compile shaders
     // -------------------------
     Shader shader("vs.glsl", "fs.glsl");
     Shader lightShader("vs.glsl", "fsLight.glsl");
+    Shader depthShader("vsShadow.glsl","fsShadow.glsl");
 
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
@@ -151,13 +154,13 @@ int main()
     };
     float planeVertices[] = {
         // positions             // normals          // texture Coords
-         5.0f, -0.5f,  5.0f,      0.0f, 1.0f, 0.0f,    2.0f, 0.0f,
-        -5.0f, -0.5f,  5.0f,      0.0f, 1.0f, 0.0f,    0.0f, 0.0f,
-        -5.0f, -0.5f, -5.0f,      0.0f, 1.0f, 0.0f,    0.0f, 2.0f,
+         15.0f, -0.5f,  15.0f,      0.0f, 1.0f, 0.0f,    2.0f, 0.0f,
+        -15.0f, -0.5f,  15.0f,      0.0f, 1.0f, 0.0f,    0.0f, 0.0f,
+        -15.0f, -0.5f, -15.0f,      0.0f, 1.0f, 0.0f,    0.0f, 2.0f,
 
-         5.0f, -0.5f,  5.0f,      0.0f, 1.0f, 0.0f,    2.0f, 0.0f,
-        -5.0f, -0.5f, -5.0f,      0.0f, 1.0f, 0.0f,    0.0f, 2.0f,
-         5.0f, -0.5f, -5.0f,      0.0f, 1.0f, 0.0f,    2.0f, 2.0f
+         15.0f, -0.5f,  15.0f,      0.0f, 1.0f, 0.0f,    2.0f, 0.0f,
+        -15.0f, -0.5f, -15.0f,      0.0f, 1.0f, 0.0f,    0.0f, 2.0f,
+         15.0f, -0.5f, -15.0f,      0.0f, 1.0f, 0.0f,    2.0f, 2.0f
     };
     // cube VAO
     unsigned int cubeVAO, cubeVBO;
@@ -193,9 +196,30 @@ int main()
 
     glBindVertexArray(0);
     //grass 
-    unsigned int squareVAO, squareVBO;
-    glGenVertexArrays(1, &squareVAO);
-    glGenBuffers(1, &squareVBO);
+    
+    //FRAME BUFFER FOR SHADOWMAP-----------------------------------------------------------------------------
+    // ------------------------------------------------------------------------------------------------------
+    //Note, the shadowmap is based on the lights pov
+    //create the framebuffer
+    unsigned int depthMapFB;
+    glGenFramebuffers(1, &depthMapFB);
+
+    //Create texture to attach to framebuffer
+    unsigned int depthMap;
+    glGenTextures(1, &depthMap);
+    glBindTexture(GL_TEXTURE_2D, depthMap);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    //Attach texture to framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFB);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+    glDrawBuffer(GL_NONE); //No need for color buffer
+    glReadBuffer(GL_NONE); //No need for color buffer
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     // load textures
     // -------------
@@ -204,16 +228,29 @@ int main()
     // shader configuration
     // --------------------
     shader.use();
-    shader.setInt("texture1", 0);
+    //shader.setInt("woodText", 0);
+    glUniform1i(glGetUniformLocation(shader.ID, "shadowMap"), 1);
 
     //POINT LIGHT
+    /*
     glUniform3fv(glGetUniformLocation(shader.ID, "pointLight.position"), 1, glm::value_ptr(lightPos));  //world space
+    glUniform3fv(glGetUniformLocation(shader.ID, "pointLight.ambient"), 1, glm::value_ptr(glm::vec3(0.025, 0.025, 0.025)));
     glUniform3fv(glGetUniformLocation(shader.ID, "pointLight.diffuse"), 1, glm::value_ptr(lightCol));      //what color does diffuse paint? I choose lightColor
     glUniform3fv(glGetUniformLocation(shader.ID, "pointLight.specular"), 1, glm::value_ptr(lightCol));     //what color does specular paint? I choose lightColor
     glUniform1f(glGetUniformLocation(shader.ID, "pointLight.intensity"), 1.0f);
     glUniform1f(glGetUniformLocation(shader.ID, "pointLight.constant"), 1.0f); // Constant attenuation
     glUniform1f(glGetUniformLocation(shader.ID, "pointLight.linear"), 0.09f);  // Linear attenuation
     glUniform1f(glGetUniformLocation(shader.ID, "pointLight.quadratic"), 0.032f); // Quadratic attenuation
+    */
+    //DIRECTIONAL LIGHT
+    glUniform3fv(glGetUniformLocation(shader.ID, "directionalLight.direction"), 1, glm::value_ptr(lightDir));  //world space
+    glUniform3fv(glGetUniformLocation(shader.ID, "directionalLight.ambient"), 1, glm::value_ptr(glm::vec3(0.025, 0.025, 0.025)));
+    glUniform3fv(glGetUniformLocation(shader.ID, "directionalLight.diffuse"), 1, glm::value_ptr(lightCol));      //what color does diffuse paint? I choose lightColor
+    glUniform3fv(glGetUniformLocation(shader.ID, "directionalLight.specular"), 1, glm::value_ptr(lightCol));     //what color does specular paint? I choose lightColor
+    glUniform1f(glGetUniformLocation(shader.ID, "directionalLight.intensity"), 1.0f);
+    glUniform1f(glGetUniformLocation(shader.ID, "directionalLight.constant"), 1.0f); // Constant attenuation
+    glUniform1f(glGetUniformLocation(shader.ID, "directionalLight.linear"), 0.09f);  // Linear attenuation
+    glUniform1f(glGetUniformLocation(shader.ID, "directionalLight.quadratic"), 0.032f); // Quadratic attenuation
 
     //MATERIAL
     glUniform3fv(glGetUniformLocation(shader.ID, "material.ambient"), 1, glm::value_ptr(glm::vec3(1.0f, 1.0f, 1.0f))); //the color of the ambient on material
@@ -244,39 +281,103 @@ int main()
         glClearColor(0.00, 0.0f, 0.0f, 0.4f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-        shader.use();
-        glUniform3fv(glGetUniformLocation(shader.ID, "viewPos"), 1, glm::value_ptr(camera.position));
-        glUniform1i(glGetUniformLocation(shader.ID, "blinn"), blinn);
-        if (blinn) glUniform1f(glGetUniformLocation(shader.ID, "material.shininess"), 32.0f); //pow!
-        else glUniform1f(glGetUniformLocation(shader.ID, "material.shininess"), 16.0f);
+        //move the light around
+        lightDir.x = 1.0f * cosf(currentFrame * 0.25f);
+        lightPos = -lightDir * 3.0f;
 
+        //FIRST PASS: RENDER DEPTHMAP------------------------------------------------------------------------------------
+        //--------------------------------------------------------------------------------------------------------------
+        depthShader.use();
+
+        float nearPlane = 1.0f;
+        float farPlane = 15.5f;
+        glm::mat4 lightProjectionMatrix = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, nearPlane, farPlane);
+        glm::mat4 lightViewMatrix = glm::lookAt(glm::vec3(lightPos), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        glm::mat4 lightSpaceMatrix = lightProjectionMatrix * lightViewMatrix; //Transforms a fragment to the pov of the directional light
+        glUniformMatrix4fv(glGetUniformLocation(depthShader.ID, "lightSpaceMatrix"), 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
+
+        glViewport(0, 0, 1024, 1024); //make sure the window rectangle is the shadowmap size
+        glBindFramebuffer(GL_FRAMEBUFFER, depthMapFB); //Note, the shadowmap is based on the lights pov
+        glClear(GL_DEPTH_BUFFER_BIT); //clear the depth buffer
+
+        //RENDER SCENE------------------------------------------------------------------------------------------------------------
         //PLANE----------------------------------------------------
-        shader.use();
         glDisable(GL_CULL_FACE); //Cant cull non-closed shapes like plane
         glBindVertexArray(planeVAO);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, woodTexture);
 
         glm::mat4 model = glm::mat4(1.0f);
         glm::mat4 view = camera.GetViewMatrix();
         glm::mat4 projection = glm::perspective(glm::radians(camera.zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
+        glUniformMatrix4fv(glGetUniformLocation(depthShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
+       // glUniformMatrix4fv(glGetUniformLocation(depthShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
+       // glUniformMatrix4fv(glGetUniformLocation(depthShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glBindVertexArray(0);
+
+        //CUBES----------------------------------------------------
+        glEnable(GL_CULL_FACE);
+        glBindVertexArray(cubeVAO);
+
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(-2.0f, 0.0f, -2.0f));
+        model = glm::rotate(model, glm::radians(20.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+        glUniformMatrix4fv(glGetUniformLocation(depthShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        //Cube 2
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, (1.0f + sinf(currentFrame)) / 2.0f, 0.0f));
+        model = glm::rotate(model, glm::radians(currentFrame * 20.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        glUniformMatrix4fv(glGetUniformLocation(depthShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+        //----------------------------------------------------------
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+
+        //SECOND PASS: RENDER SCENE-------------------------------------------------------------------------------
+        //---------------------------------------------------------------------------------------------------------
+        glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, woodTexture);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, depthMap);
         
+        shader.use();
+        //Send important stuffs to shader...
+        glUniform3fv(glGetUniformLocation(shader.ID, "viewPos"), 1, glm::value_ptr(camera.position));
+        glUniform1i(glGetUniformLocation(shader.ID, "blinn"), blinn);
+        if (blinn) glUniform1f(glGetUniformLocation(shader.ID, "material.shininess"), 64.0f); //pow!
+        else glUniform1f(glGetUniformLocation(shader.ID, "material.shininess"), 32.0f);
+        glUniformMatrix4fv(glGetUniformLocation(shader.ID, "lightSpaceMatrix"), 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
+        glUniform3fv(glGetUniformLocation(shader.ID, "directionalLight.direction"), 1, glm::value_ptr(lightDir));  //world space
+        
+
+        //RENDER SCENE------------------------------------------------------------------------------------------------------------
+        //PLANE----------------------------------------------------
+        glDisable(GL_CULL_FACE); //Cant cull non-closed shapes like plane
+        glBindVertexArray(planeVAO);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, woodTexture);
+
+        model = glm::mat4(1.0f);
+        view = camera.GetViewMatrix();
+        projection = glm::perspective(glm::radians(camera.zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 
         glUniformMatrix4fv(glGetUniformLocation(shader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
         glUniformMatrix4fv(glGetUniformLocation(shader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(glGetUniformLocation(shader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-        
+
         glDrawArrays(GL_TRIANGLES, 0, 6);
         glBindVertexArray(0);
-        //----------------------------------------------------------
 
         //CUBES----------------------------------------------------
-        //shader.use();
         glEnable(GL_CULL_FACE);
         glBindVertexArray(cubeVAO);
-        //glActiveTexture(GL_TEXTURE0);
-        //glBindTexture(GL_TEXTURE_2D, cubeTexture);
 
         model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(-2.0f, 0.0f, -2.0f));
@@ -291,20 +392,19 @@ int main()
         model = glm::rotate(model, glm::radians(currentFrame * 20.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         glUniformMatrix4fv(glGetUniformLocation(shader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
         glDrawArrays(GL_TRIANGLES, 0, 36);
-
-        
         //----------------------------------------------------------
 
-        //LIGHT
+        //LIGHT (debug)
+        
         lightShader.use();
         model = glm::mat4(1.0f);
-        model = glm::translate(model, lightPos);
-        model = glm::scale(model, glm::vec3(0.1f,0.1f, 0.1f));
+        model = glm::translate(model, glm::vec3(lightPos));
+        model = glm::scale(model, glm::vec3(0.2f,0.2f, 0.2f));
         glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
-        glUniformMatrix4fv(glGetUniformLocation(shader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
-        glUniformMatrix4fv(glGetUniformLocation(shader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+        glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
         glDrawArrays(GL_TRIANGLES, 0, 36);
-
+        
         glBindVertexArray(0);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
@@ -411,16 +511,28 @@ unsigned int loadTexture(char const* path)
     if (data)
     {
         GLenum format;
+        GLenum internalFormat;
         if (nrComponents == 1)
+        {
             format = GL_RED;
+            internalFormat = GL_RED;
+        }
         else if (nrComponents == 3)
-            format = GL_RGB;
+        {
+            format = GL_SRGB;
+            internalFormat = GL_RGB;
+        }
+            
         else if (nrComponents == 4)
+        {
             format = GL_RGBA;
+            internalFormat = GL_SRGB_ALPHA;
+        }
+            
 
 
         glBindTexture(GL_TEXTURE_2D, textureID);
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, internalFormat, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
 
         if (format == GL_RGBA)

@@ -138,7 +138,9 @@
   <ItemGroup>
     <None Include="fs.glsl" />
     <None Include="fsLight.glsl" />
+    <None Include="fsShadow.glsl" />
     <None Include="vs.glsl" />
+    <None Include="vsShadow.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

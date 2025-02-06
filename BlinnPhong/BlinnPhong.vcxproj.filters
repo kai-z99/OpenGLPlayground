@@ -23,5 +23,7 @@
     <None Include="fs.glsl" />
     <None Include="vs.glsl" />
     <None Include="fsLight.glsl" />
+    <None Include="vsShadow.glsl" />
+    <None Include="fsShadow.glsl" />
   </ItemGroup>
 </Project>
