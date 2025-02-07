@@ -40,7 +40,6 @@ bool blinn = false;
 bool blinnKeyPressed = false;
 
 
-
 int main()
 {
     // glfw: initialize and configure
@@ -226,7 +225,7 @@ int main()
 
     // load textures
     // -------------
-    unsigned int woodTexture = loadTexture("../ShareLib/Resources/brick.jpg");
+    unsigned int woodTexture = loadTexture("../ShareLib/Resources/dirt.jpg");
 
     // shader configuration
     // --------------------

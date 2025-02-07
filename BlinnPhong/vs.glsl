@@ -19,8 +19,8 @@ uniform mat4 lightSpaceMatrix;
 void main()
 {
     gl_Position = projection * view * model * vec4(aPos, 1.0);  //frag position in screen space
-    TexCoord = aTexCoord;                                      // texture coords
     ourNormal = mat3(transpose(inverse(model))) * aNormal;     //Normal, taking into account non-linear scaling
+    TexCoord = aTexCoord;                                      // texture coords
     FragPos = vec3(model * vec4(aPos, 1.0));                   //fragment position in world space
     LightSpaceFragPos = lightSpaceMatrix * model * vec4(aPos, 1.0); //fragment postiion in light space
 }

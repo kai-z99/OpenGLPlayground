@@ -1,9 +1,6 @@
 #version 330 core
 out vec4 FragColor;
 
-in vec2 TexCoord;
-
-uniform sampler2D texture1;
 
 struct Material
 {
@@ -53,6 +50,7 @@ uniform DirectionalLight directionalLight;
 
 float ShadowCalculation(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir);
 
+in vec2 TexCoord;
 in vec3 ourNormal;
 in vec3 FragPos;
 in vec4 LightSpaceFragPos;
@@ -79,7 +77,6 @@ uniform sampler2D shadowMap;
 
 float ShadowCalculation(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir )
 {
-    
     vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
 
     //Firstly, we are working in a "snapshot" view. fragPosLightSpace is in clipspace, where the clip is 
@@ -94,7 +91,7 @@ float ShadowCalculation(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir )
     //Currently, FragPosLightSpace is in clipspace and in the form (x,y,z,w) but each of those attributes are not in the range [-1,1].
     //The reason for this is that we did not assign this varible to gl_Position. When you assign something to gl_Position,
     //it automattically performs a persective divide (x,y,z,w)/w. But since we didnt, we should do it ourselves.
-    //Once we move it to [0,1] its now in the NDC range, that it would have been if we assigned it with gl_Position.
+    //Once we move it to [-1,1] its now in the NDC range, that it would have been if we assigned it with gl_Position.
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w; //perspective divide to convert to [-1,1]
 
     //At this state its like we assinged it with gl_Position. But since we want to index with our shadowMap which is in the range
@@ -112,6 +109,10 @@ float ShadowCalculation(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir )
     //"A light-space projected fragment coordinate is further than the light's far plane when its z coordinate is larger than 1.0"
     if (currentDepth > 1.0f) return 0.0f; //Outside the far plane
 
+    //SHADOW ACNE: Look at the floor in front of you, the resolution of that floor is perfect. But in the shadowMap's "snapshot" of that same view,
+    //The resolution of the shadowMap is not perfect so there will be little shadow ridges. So why would you try to compare these 2 ? Even an extremely small closetDepth
+    //discrepency will change the shadow from 0.0 to 1.0f (when currentDepth is underneath a shadow ridge). The solution is to drag currentDepth forward slightly so the curentDepth is
+    //never underneath one of the shadow ridges.
     float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);  
 
     float shadow = 0.0;
