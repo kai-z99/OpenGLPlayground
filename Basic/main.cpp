@@ -45,7 +45,6 @@ glm::vec3 globalAmbient = glm::vec3(0.13f, 0.13f, 0.13f);
 
 bool flashLightOn = true;
 
-
 glm::vec3 testLightPosition = glm::vec3(0.0f, 1.0f, 0.0f);
 glm::vec3 testLightColor = glm::vec3(1.0f, 1.0f, 1.0f);
 

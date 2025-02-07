@@ -68,6 +68,7 @@ int main()
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
+    glfwWindowHint(GLFW_SAMPLES, 4);
 
     // tell GLFW to capture our mouse
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -208,11 +209,13 @@ int main()
     unsigned int depthMap;
     glGenTextures(1, &depthMap);
     glBindTexture(GL_TEXTURE_2D, depthMap);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, 2048, 2048, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER); //DONT LET THE TEXTURE MAP REPEAT
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER); //DONT LET THE TEXTURE MAP REPEAT
+    float borderCol[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderCol); // Instead, outside its range should just be 1.0f (furthest away, so no shadow)
 
     //Attach texture to framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, depthMapFB);
@@ -223,7 +226,7 @@ int main()
 
     // load textures
     // -------------
-    unsigned int woodTexture = loadTexture("../ShareLib/Resources/wood.png");
+    unsigned int woodTexture = loadTexture("../ShareLib/Resources/brick.jpg");
 
     // shader configuration
     // --------------------
@@ -290,15 +293,18 @@ int main()
         depthShader.use();
 
         float nearPlane = 1.0f;
-        float farPlane = 15.5f;
+        float farPlane = 8.5f;
         glm::mat4 lightProjectionMatrix = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, nearPlane, farPlane);
         glm::mat4 lightViewMatrix = glm::lookAt(glm::vec3(lightPos), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         glm::mat4 lightSpaceMatrix = lightProjectionMatrix * lightViewMatrix; //Transforms a fragment to the pov of the directional light
         glUniformMatrix4fv(glGetUniformLocation(depthShader.ID, "lightSpaceMatrix"), 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
 
-        glViewport(0, 0, 1024, 1024); //make sure the window rectangle is the shadowmap size
+        glViewport(0, 0, 2048, 2048); //make sure the window rectangle is the shadowmap size
         glBindFramebuffer(GL_FRAMEBUFFER, depthMapFB); //Note, the shadowmap is based on the lights pov
         glClear(GL_DEPTH_BUFFER_BIT); //clear the depth buffer
+        //glCullFace(GL_FRONT);
+
+        //At this point, the depth map will be filled with the closest values from the lights pov. (After rendering)
 
         //RENDER SCENE------------------------------------------------------------------------------------------------------------
         //PLANE----------------------------------------------------
@@ -320,10 +326,10 @@ int main()
         glEnable(GL_CULL_FACE);
         glBindVertexArray(cubeVAO);
 
+        //Cube 1
         model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(-2.0f, 0.0f, -2.0f));
         model = glm::rotate(model, glm::radians(20.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-
         glUniformMatrix4fv(glGetUniformLocation(depthShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
         glDrawArrays(GL_TRIANGLES, 0, 36);
 
@@ -333,27 +339,34 @@ int main()
         model = glm::rotate(model, glm::radians(currentFrame * 20.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         glUniformMatrix4fv(glGetUniformLocation(depthShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
         glDrawArrays(GL_TRIANGLES, 0, 36);
-        //----------------------------------------------------------
+        //END CUBES-------------------------------------------------
+
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        //glCullFace(GL_BACK);
+
+        //END RENDER SCENE-------------------------------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------------------------
 
 
-        //SECOND PASS: RENDER SCENE-------------------------------------------------------------------------------
+        //------------------------------------------------------------------------------------------------------------
+        //SECOND PASS: RENDER SCENE NORMALY---------------------------------------------------------------------------
         //---------------------------------------------------------------------------------------------------------
+        shader.use();
+
         glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, woodTexture);
+        glBindTexture(GL_TEXTURE_2D, woodTexture); //We set the uniform for material.diffuse to id 0
         glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, depthMap);
+        glBindTexture(GL_TEXTURE_2D, depthMap);    //We set the uniform for depthMap to id 1
         
-        shader.use();
         //Send important stuffs to shader...
         glUniform3fv(glGetUniformLocation(shader.ID, "viewPos"), 1, glm::value_ptr(camera.position));
         glUniform1i(glGetUniformLocation(shader.ID, "blinn"), blinn);
         if (blinn) glUniform1f(glGetUniformLocation(shader.ID, "material.shininess"), 64.0f); //pow!
         else glUniform1f(glGetUniformLocation(shader.ID, "material.shininess"), 32.0f);
-        glUniformMatrix4fv(glGetUniformLocation(shader.ID, "lightSpaceMatrix"), 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
+        glUniformMatrix4fv(glGetUniformLocation(shader.ID, "lightSpaceMatrix"), 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix)); //for comparison to depthMap
         glUniform3fv(glGetUniformLocation(shader.ID, "directionalLight.direction"), 1, glm::value_ptr(lightDir));  //world space
         
 
@@ -379,6 +392,7 @@ int main()
         glEnable(GL_CULL_FACE);
         glBindVertexArray(cubeVAO);
 
+        //Cube 1
         model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(-2.0f, 0.0f, -2.0f));
         model = glm::rotate(model, glm::radians(20.0f), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -393,9 +407,9 @@ int main()
         glUniformMatrix4fv(glGetUniformLocation(shader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
         glDrawArrays(GL_TRIANGLES, 0, 36);
         //----------------------------------------------------------
-
-        //LIGHT (debug)
-        
+        //END CUBES-------------------------------------------------
+        // 
+        //LIGHT (debug)---------------------------------------------------------------------------------------------------
         lightShader.use();
         model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(lightPos));
@@ -406,6 +420,10 @@ int main()
         glDrawArrays(GL_TRIANGLES, 0, 36);
         
         glBindVertexArray(0);
+        //END LIGHT-------------------------------------------------------------------------------------------------------
+
+        //END SECOND PASS---------------------------------------------------------------------------------------------------
+        //------------------------------------------------------------------------------------------------------------------
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
