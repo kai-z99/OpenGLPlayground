@@ -215,6 +215,14 @@ int main()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER); //DONT LET THE TEXTURE MAP REPEAT
     float borderCol[] = { 1.0f, 1.0f, 1.0f, 1.0f };
     glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderCol); // Instead, outside its range should just be 1.0f (furthest away, so no shadow)
+    //projected coordinates outside the light's frustum are higher than 1.0 and will thus sample the depth 
+    // texture outside its default range of [0,1]. This is why we cant use GL_REPEAT for that texture.
+    //Think of it like this, the shadow "snapshot" is acutally smaller than the real snapshot, so stuff outside it just repeats if you have that enabled,
+    // Causeing duped shadows on the edges. The cure?, make everything that is out of the range of the shadowMap to just return 1.0f, the furthest distance
+    //so nothing will be under it.
+
+
+    //Btw, just widening the frustum would reduce the accuracy.
 
     //Attach texture to framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, depthMapFB);
@@ -292,8 +300,11 @@ int main()
         depthShader.use();
 
         float nearPlane = 1.0f;
-        float farPlane = 8.5f;
+        float farPlane = 10.5f;
+
+        //This matrix creates the size of the shadowMap snapshot.
         glm::mat4 lightProjectionMatrix = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, nearPlane, farPlane);
+        //This one changes where its pointing.
         glm::mat4 lightViewMatrix = glm::lookAt(glm::vec3(lightPos), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         glm::mat4 lightSpaceMatrix = lightProjectionMatrix * lightViewMatrix; //Transforms a fragment to the pov of the directional light
         glUniformMatrix4fv(glGetUniformLocation(depthShader.ID, "lightSpaceMatrix"), 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix));
@@ -338,6 +349,15 @@ int main()
         model = glm::rotate(model, glm::radians(currentFrame * 20.0f), glm::vec3(0.0f, 1.0f, 0.0f));
         glUniformMatrix4fv(glGetUniformLocation(depthShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
         glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        //Cube 3
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, 2.0f, 2.0f));
+        model = glm::rotate(model, glm::radians(currentFrame * 20.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        model = glm::scale(model, glm::vec3(3.0f, 0.5f, 1.0f));
+        glUniformMatrix4fv(glGetUniformLocation(depthShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
         //END CUBES-------------------------------------------------
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -403,6 +423,14 @@ int main()
         model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(0.0f, (1.0f + sinf(currentFrame)) / 2.0f, 0.0f));
         model = glm::rotate(model, glm::radians(currentFrame * 20.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+        glUniformMatrix4fv(glGetUniformLocation(shader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        //Cube 3
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, 2.0f, 2.0f));
+        model = glm::rotate(model, glm::radians(currentFrame * 20.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+        model = glm::scale(model, glm::vec3(3.0f, 0.5f, 1.0f));
         glUniformMatrix4fv(glGetUniformLocation(shader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
         glDrawArrays(GL_TRIANGLES, 0, 36);
         //----------------------------------------------------------

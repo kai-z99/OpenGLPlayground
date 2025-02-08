@@ -92,6 +92,14 @@ float ShadowCalculation(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir )
     //The reason for this is that we did not assign this varible to gl_Position. When you assign something to gl_Position,
     //it automattically performs a persective divide (x,y,z,w)/w. But since we didnt, we should do it ourselves.
     //Once we move it to [-1,1] its now in the NDC range, that it would have been if we assigned it with gl_Position.
+
+    //NOTE: This is all assuming that the fragpos is in the light's frustum.
+    // Projected coordinates outside the light's frustum are higher than 1.0 and will thus sample the depth 
+    // texture outside its default range of [0,1]. This is why we cant use GL_REPEAT for that texture.
+    
+    //Well, why cant we just say anything outside the frustum is not a shadow, aka check if any of the coordinates
+    //of projecoords > 1.0f? Well thats just the wrong philosophy. Removing GL_REPEAT and setting value of shadowMap to 1.0f
+    //anytime something outside of xy[0,1] is sampled is more consistant with the philosphy of design.
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w; //perspective divide to convert to [-1,1]
 
     //At this state its like we assinged it with gl_Position. But since we want to index with our shadowMap which is in the range
@@ -106,7 +114,9 @@ float ShadowCalculation(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir )
     float closestDepth = texture(shadowMap, projCoords.xy).r;   
     float currentDepth = projCoords.z; 
 
-    //"A light-space projected fragment coordinate is further than the light's far plane when its z coordinate is larger than 1.0"
+    //"A light-space projected fragment z coordinate is further than the light's far plane when its z coordinate is larger than 1.0"
+    //The formula to calculate the z cooridnate of the frag is: z = 0 = near and z = 1 = far. So anything past the far plane is >1.0.
+    //Essentially this is out of bounds, so just dont cast a shadow as its not pasrt of the calculation anymore.
     if (currentDepth > 1.0f) return 0.0f; //Outside the far plane
 
     //SHADOW ACNE: Look at the floor in front of you, the resolution of that floor is perfect. But in the shadowMap's "snapshot" of that same view,
