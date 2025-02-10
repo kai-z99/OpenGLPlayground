@@ -123,17 +123,18 @@ float ShadowCalculation(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir )
     //The resolution of the shadowMap is not perfect so there will be little shadow ridges. So why would you try to compare these 2 ? Even an extremely small closetDepth
     //discrepency will change the shadow from 0.0 to 1.0f (when currentDepth is underneath a shadow ridge). The solution is to drag currentDepth forward slightly so the curentDepth is
     //never underneath one of the shadow ridges.
+    //float bias = 0.005;
     float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);  
 
     float shadow = 0.0;
-    //Study this later
-    
+
+    //This is like a convolution matrix.
     for(int x = -1; x <= 1; ++x)
     {
         for(int y = -1; y <= 1; ++y)
         {
-        float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r; 
-        shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;        
+            float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r; 
+            shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;        
         }    
     }
     shadow /= 9.0;

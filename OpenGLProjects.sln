@@ -23,6 +23,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Instancing", "Instancing\In
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BlinnPhong", "BlinnPhong\BlinnPhong.vcxproj", "{BF942D57-5C61-4FBD-B1B2-DBD7845D441F}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PointShadows", "PointShadows\PointShadows.vcxproj", "{64048FB7-3DE1-469D-9C39-D03FA946D9DE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -103,6 +105,14 @@ Global
 		{BF942D57-5C61-4FBD-B1B2-DBD7845D441F}.Release|x64.Build.0 = Release|x64
 		{BF942D57-5C61-4FBD-B1B2-DBD7845D441F}.Release|x86.ActiveCfg = Release|Win32
 		{BF942D57-5C61-4FBD-B1B2-DBD7845D441F}.Release|x86.Build.0 = Release|Win32
+		{64048FB7-3DE1-469D-9C39-D03FA946D9DE}.Debug|x64.ActiveCfg = Debug|x64
+		{64048FB7-3DE1-469D-9C39-D03FA946D9DE}.Debug|x64.Build.0 = Debug|x64
+		{64048FB7-3DE1-469D-9C39-D03FA946D9DE}.Debug|x86.ActiveCfg = Debug|Win32
+		{64048FB7-3DE1-469D-9C39-D03FA946D9DE}.Debug|x86.Build.0 = Debug|Win32
+		{64048FB7-3DE1-469D-9C39-D03FA946D9DE}.Release|x64.ActiveCfg = Release|x64
+		{64048FB7-3DE1-469D-9C39-D03FA946D9DE}.Release|x64.Build.0 = Release|x64
+		{64048FB7-3DE1-469D-9C39-D03FA946D9DE}.Release|x86.ActiveCfg = Release|Win32
+		{64048FB7-3DE1-469D-9C39-D03FA946D9DE}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -113,6 +123,7 @@ Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		ShareLib\ShareLib.vcxitems*{3f232ee4-de84-4472-bc29-d7a4480b538c}*SharedItemsImports = 4
 		ShareLib\ShareLib.vcxitems*{59cf8dcf-6b4b-4de9-a2bd-04f34a5c3f1b}*SharedItemsImports = 4
+		ShareLib\ShareLib.vcxitems*{64048fb7-3de1-469d-9c39-d03fa946d9de}*SharedItemsImports = 4
 		ShareLib\ShareLib.vcxitems*{753acbcf-6d1c-4d92-a691-67c99b078045}*SharedItemsImports = 9
 		ShareLib\ShareLib.vcxitems*{7c3b8518-2df5-49d5-89b6-9d25215fffa8}*SharedItemsImports = 4
 		ShareLib\ShareLib.vcxitems*{9af37363-c6a3-44c1-b834-61909905181d}*SharedItemsImports = 4
