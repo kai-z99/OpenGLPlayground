@@ -17,11 +17,11 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow* window);
 unsigned int loadTexture(const char* path);
-void renderScene(Shader& shader, unsigned int planeVAO, unsigned int cubeVAO, float currentFrame);
+void renderScene(Shader& shader, unsigned int planeVAO, unsigned int cubeVAO, float currentFrame, unsigned int blockTex, unsigned int floorTex);
 
 // settings
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+const unsigned int SCR_WIDTH = 1920;
+const unsigned int SCR_HEIGHT = 1080;
 
 // camera
 Camera camera(glm::vec3(0.0f, 0.0f, 0.0f));
@@ -233,6 +233,7 @@ int main()
     // load textures
     // -------------
     unsigned int woodTexture = loadTexture("../ShareLib/Resources/wood.png");
+    unsigned int stoneTexture = loadTexture("../ShareLib/Resources/stone.jpg");
 
     // shader configuration
     // --------------------
@@ -322,7 +323,7 @@ int main()
             glClear(GL_DEPTH_BUFFER_BIT); //clear the depth buffer
 
             //glCullFace(GL_FRONT);
-            renderScene(depthShader, planeVAO, cubeVAO, currentFrame);
+            renderScene(depthShader, planeVAO, cubeVAO, currentFrame, stoneTexture, woodTexture);
             //glCullFace(GL_BACK);
         }
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -356,7 +357,7 @@ int main()
         glUniformMatrix4fv(glGetUniformLocation(shader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(glGetUniformLocation(shader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
-        renderScene(shader, planeVAO, cubeVAO, currentFrame);
+        renderScene(shader, planeVAO, cubeVAO, currentFrame, stoneTexture, woodTexture);
 
 
         //Light (debug)---------------------------------------------------------------------------------------------------
@@ -392,11 +393,14 @@ int main()
     return 0;
 }
 
-void renderScene(Shader& shader, unsigned int planeVAO, unsigned int cubeVAO, float currentFrame)
+void renderScene(Shader& shader, unsigned int planeVAO, unsigned int cubeVAO, float currentFrame, unsigned int blockTex, unsigned int floorTex)
 {
     glm::mat4 model = glm::mat4(1.0f);
     glDisable(GL_CULL_FACE); //Cant cull non-closed shapes like plane
     glBindVertexArray(planeVAO);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, floorTex); //We set the uniform for material.diffuse to id 0
+
     model = glm::mat4(1.00f);
     model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
     glUniformMatrix4fv(glGetUniformLocation(shader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
@@ -406,6 +410,8 @@ void renderScene(Shader& shader, unsigned int planeVAO, unsigned int cubeVAO, fl
     //CUBES----------------------------------------------------
     glEnable(GL_CULL_FACE);
     glBindVertexArray(cubeVAO);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, blockTex); //We set the uniform for material.diffuse to id 0
 
     //Cube 1
     model = glm::mat4(1.0f);
@@ -414,7 +420,9 @@ void renderScene(Shader& shader, unsigned int planeVAO, unsigned int cubeVAO, fl
     glUniformMatrix4fv(glGetUniformLocation(shader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
+   
     
+
     //Cube 2
     model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(0.0f, (1.0f + sinf(currentFrame)) / 2.0f, 5.0f));
