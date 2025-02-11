@@ -245,7 +245,7 @@ int main()
     glUniform3fv(glGetUniformLocation(shader.ID, "pointLight.ambient"), 1, glm::value_ptr(glm::vec3(0.025, 0.025, 0.025))); //basically global ambient since only one light in scene
     glUniform3fv(glGetUniformLocation(shader.ID, "pointLight.diffuse"), 1, glm::value_ptr(lightCol));      //what color does diffuse paint? I choose lightColor
     glUniform3fv(glGetUniformLocation(shader.ID, "pointLight.specular"), 1, glm::value_ptr(lightCol));     //what color does specular paint? I choose lightColor
-    glUniform1f(glGetUniformLocation(shader.ID, "pointLight.intensity"), 1.0f);
+    glUniform1f(glGetUniformLocation(shader.ID, "pointLight.intensity"), 1.2f);
     glUniform1f(glGetUniformLocation(shader.ID, "pointLight.constant"), 1.0f); // Constant attenuation
     glUniform1f(glGetUniformLocation(shader.ID, "pointLight.linear"), 0.09f);  // Linear attenuation
     glUniform1f(glGetUniformLocation(shader.ID, "pointLight.quadratic"), 0.032f); // Quadratic attenuation
@@ -347,6 +347,7 @@ int main()
         else glUniform1f(glGetUniformLocation(shader.ID, "material.shininess"), 16.0f);
         glUniform1f(glGetUniformLocation(shader.ID, "farPlane"), far);
         glUniform3fv(glGetUniformLocation(shader.ID, "lightPos"), 1, glm::value_ptr(lightPos));
+        glUniform3fv(glGetUniformLocation(shader.ID, "pointLight.position"), 1, glm::value_ptr(lightPos));  //world space
 
 
         //RENDER SCENE------------------------------------------------------------------------------------------------------------

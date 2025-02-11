@@ -96,7 +96,7 @@ float ShadowCalculation(vec3 fragPos)
     int samples = 20;
     float viewDistance = length(viewPos - fragPos);
     float diskRadius = (1.0 + (viewDistance / farPlane)) / 25.0; 
-
+    
     for(int i = 0; i < samples; ++i)
     {
         float closestDepth = texture(shadowMap, lightToFrag + sampleOffsetDirections[i] * diskRadius).r;
@@ -107,6 +107,11 @@ float ShadowCalculation(vec3 fragPos)
     }
 
     shadow /= float(samples);  
+    
+
+    //float closestDepth = texture(shadowMap, lightToFrag).r;
+    //closestDepth *= farPlane;
+    //if (currentDepth - bias > closestDepth) shadow += 1.0;
     
     //Finish!
     return shadow;
