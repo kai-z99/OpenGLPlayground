@@ -197,9 +197,6 @@ int main()
 
     glBindVertexArray(0);
 
-
-
-
     //FRAME BUFFER FOR SHADOWMAP-----------------------------------------------------------------------------
     // ------------------------------------------------------------------------------------------------------
     //Note, the shadowmap is based on the lights pov
@@ -212,6 +209,7 @@ int main()
     glGenTextures(1, &depthCubeMap);
     glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubeMap);
 
+    //attach each face with its texture. This texture is empty and just has GL_DEPTH_COMPONENT
     const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
     for (unsigned int i = 0; i < 6; ++i)
     {
@@ -223,14 +221,12 @@ int main()
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE); //DONT LET THE TEXTURE MAP REPEAT
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE); //DONT LET THE TEXTURE MAP REPEAT
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE); //DONT LET THE TEXTURE MAP REPEAT
 
     //Attach texture to framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, depthMapFB);
-    //glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCubeMap, 0);
-    glDrawBuffer(GL_NONE); //No need for color buffer
+    //glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCubeMap, 0); not using geometry shader
+    glDrawBuffer(GL_NONE); //No need for color buffer, just depth
     glReadBuffer(GL_NONE); //No need for color buffer
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -245,9 +241,8 @@ int main()
     glUniform1i(glGetUniformLocation(shader.ID, "shadowMap"), 1);
 
     //POINT LIGHT
-    
     glUniform3fv(glGetUniformLocation(shader.ID, "pointLight.position"), 1, glm::value_ptr(lightPos));  //world space
-    glUniform3fv(glGetUniformLocation(shader.ID, "pointLight.ambient"), 1, glm::value_ptr(glm::vec3(0.025, 0.025, 0.025)));
+    glUniform3fv(glGetUniformLocation(shader.ID, "pointLight.ambient"), 1, glm::value_ptr(glm::vec3(0.025, 0.025, 0.025))); //basically global ambient since only one light in scene
     glUniform3fv(glGetUniformLocation(shader.ID, "pointLight.diffuse"), 1, glm::value_ptr(lightCol));      //what color does diffuse paint? I choose lightColor
     glUniform3fv(glGetUniformLocation(shader.ID, "pointLight.specular"), 1, glm::value_ptr(lightCol));     //what color does specular paint? I choose lightColor
     glUniform1f(glGetUniformLocation(shader.ID, "pointLight.intensity"), 1.0f);
@@ -257,14 +252,13 @@ int main()
 
     
     //MATERIAL
-    glUniform3fv(glGetUniformLocation(shader.ID, "material.ambient"), 1, glm::value_ptr(glm::vec3(1.0f, 1.0f, 1.0f))); //the color of the ambient on material
+    glUniform3fv(glGetUniformLocation(shader.ID, "material.ambient"), 1, glm::value_ptr(glm::vec3(1.0f, 1.0f, 1.0f))); //the color of the ambient on material (unused)
     glUniform1i(glGetUniformLocation(shader.ID, "material.diffuse"), 0); // GL_TEXTURE0, (wood)
     //glUniform1i(glGetUniformLocation(shader.ID, "material.specular"), 1); // GL_TEXTURE1, (wood specular map)
     glUniform1f(glGetUniformLocation(shader.ID, "material.shininess"), 16.0f); //pow!
 
     lightShader.use();
     glUniform3fv(glGetUniformLocation(lightShader.ID, "lightColor"), 1, glm::value_ptr(lightCol));
-
 
     float aspect = (float)SHADOW_WIDTH / (float)SHADOW_HEIGHT;
     float near = 0.1f;
@@ -299,7 +293,7 @@ int main()
 
         //FIRST PASS: RENDER DEPTHMAP------------------------------------------------------------------------------------
         //--------------------------------------------------------------------------------------------------------------
-        glBindFramebuffer(GL_FRAMEBUFFER, depthMapFB);
+        glBindFramebuffer(GL_FRAMEBUFFER, depthMapFB); //write to the shadowMap
         glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT); //make sure the window rectangle is the shadowmap size
         depthShader.use();
 
@@ -327,7 +321,9 @@ int main()
             glUniformMatrix4fv(glGetUniformLocation(depthShader.ID, "lightSpaceMatrix"), 1, GL_FALSE, glm::value_ptr(shadowTransforms[i]));
             glClear(GL_DEPTH_BUFFER_BIT); //clear the depth buffer
 
+            //glCullFace(GL_FRONT);
             renderScene(depthShader, planeVAO, cubeVAO, currentFrame);
+            //glCullFace(GL_BACK);
         }
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
