@@ -88,8 +88,8 @@ float ShadowCalculation(vec3 fragPos)
 
     //if (currentDepth > 1.0f) return 0.0f; //Outside the far plane
 
-    float bias = 0.05;
-    //float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);  
+    //float bias = 0.05;
+    float bias = max(0.05 * (1.0 - dot(normalize(ourNormal), normalize(lightToFrag))), 0.005);  
 
     float shadow = currentDepth -  bias > closestDepth ? 1.0 : 0.0;
     
@@ -124,12 +124,11 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir, f
     // attenuation
     float distance    = length(light.position - fragPos);
     
-    /*
-    float attenuation = 1.0 / (light.constant + light.linear * distance + 
-  			     light.quadratic * (distance * distance));    
-    */
+    
+    float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));    
+    
 
-    float attenuation = 1.0 / (distance * distance); //quadratic attenuation
+    //float attenuation = 1.0 / (distance * distance); //quadratic attenuation
 
     // combine results
     vec3 ambient  = light.ambient  * vec3(texture(material.diffuse, TexCoord));

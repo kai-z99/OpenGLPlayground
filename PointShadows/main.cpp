@@ -250,7 +250,7 @@ int main()
     glUniform3fv(glGetUniformLocation(shader.ID, "pointLight.ambient"), 1, glm::value_ptr(glm::vec3(0.025, 0.025, 0.025)));
     glUniform3fv(glGetUniformLocation(shader.ID, "pointLight.diffuse"), 1, glm::value_ptr(lightCol));      //what color does diffuse paint? I choose lightColor
     glUniform3fv(glGetUniformLocation(shader.ID, "pointLight.specular"), 1, glm::value_ptr(lightCol));     //what color does specular paint? I choose lightColor
-    glUniform1f(glGetUniformLocation(shader.ID, "pointLight.intensity"), 5.0f);
+    glUniform1f(glGetUniformLocation(shader.ID, "pointLight.intensity"), 1.0f);
     glUniform1f(glGetUniformLocation(shader.ID, "pointLight.constant"), 1.0f); // Constant attenuation
     glUniform1f(glGetUniformLocation(shader.ID, "pointLight.linear"), 0.09f);  // Linear attenuation
     glUniform1f(glGetUniformLocation(shader.ID, "pointLight.quadratic"), 0.032f); // Quadratic attenuation
@@ -293,8 +293,9 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         //move the light around
-        //lightPos.y = sinf(currentFrame);
-        //lightPos.x = sinf(currentFrame);
+        lightPos.y = 3 * ((1.0f + sinf(currentFrame)) / 2);
+        lightPos.x = 3 * sinf(currentFrame);
+        lightPos.z = 2 * cosf(currentFrame);
 
         //FIRST PASS: RENDER DEPTHMAP------------------------------------------------------------------------------------
         //--------------------------------------------------------------------------------------------------------------
@@ -318,6 +319,7 @@ int main()
         glUniform3fv(glGetUniformLocation(depthShader.ID, "lightPos"), 1, glm::value_ptr(lightPos));
         glUniform1f(glGetUniformLocation(depthShader.ID, "farPlane"), far);
 
+        //Render each face of the cubemap
         for (int i = 0; i < 6; i++)
         {
             GLenum face = GL_TEXTURE_CUBE_MAP_POSITIVE_X + i;
@@ -348,6 +350,8 @@ int main()
         if (blinn) glUniform1f(glGetUniformLocation(shader.ID, "material.shininess"), 32.0f); //pow!
         else glUniform1f(glGetUniformLocation(shader.ID, "material.shininess"), 16.0f);
         glUniform1f(glGetUniformLocation(shader.ID, "farPlane"), far);
+        glUniform3fv(glGetUniformLocation(shader.ID, "lightPos"), 1, glm::value_ptr(lightPos));
+
 
         //RENDER SCENE------------------------------------------------------------------------------------------------------------
         glm::mat4 view = camera.GetViewMatrix();
@@ -424,7 +428,7 @@ void renderScene(Shader& shader, unsigned int planeVAO, unsigned int cubeVAO, fl
     
     //Cube 3
     model = glm::mat4(1.0f);
-    model = glm::translate(model, glm::vec3(2.0f, 0.5f, 0.0f));
+    model = glm::translate(model, glm::vec3(2.0f, 0.5f, -2.0f));
     model = glm::rotate(model, glm::radians(currentFrame * 20.0f), glm::vec3(0.0f, 1.0f, 1.0f));
     model = glm::scale(model, glm::vec3(3.0f, 0.5f, 1.0f));
     glUniformMatrix4fv(glGetUniformLocation(shader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
