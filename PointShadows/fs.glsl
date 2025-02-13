@@ -26,7 +26,7 @@ struct PointLight {
     vec3 specular;
 };  
 
-vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir, float shadow);
+vec3 CalcPointLight(PointLight light, mat3 TBN, vec3 fragPos, vec3 viewDir, float shadow);
 uniform PointLight pointLight;
 
 
@@ -53,12 +53,18 @@ float ShadowCalculation(vec3 lightPos);
 in vec2 TexCoord;
 in vec3 ourNormal;
 in vec3 FragPos;
+in mat3 TBN;
 
 uniform vec3 viewPos;
 uniform bool blinn;
 uniform samplerCube shadowMap;
+uniform sampler2D normalMap;
 uniform vec3 lightPos;
 uniform float farPlane;
+uniform float currentFrame;
+uniform bool scrollNormal;
+
+
 
 void main()
 {             
@@ -67,7 +73,7 @@ void main()
     vec3 viewDir = normalize(viewPos - FragPos);
 
     float shadow = ShadowCalculation(FragPos);
-    vec3 result = CalcPointLight(pointLight, norm, FragPos, viewDir, shadow);
+    vec3 result = CalcPointLight(pointLight, TBN, FragPos, viewDir, shadow);
 
     FragColor = vec4(result, 1.0f);
 
@@ -89,7 +95,7 @@ float ShadowCalculation(vec3 fragPos)
 
     vec3 lightToFrag = fragPos - lightPos;
     float currentDepth = length(lightToFrag); //[0, farPlane] good
-
+      
     //float bias = 0.05;
     float bias = max(0.05 * (1.0 - dot(normalize(ourNormal), normalize(lightToFrag))), 0.005);  
     float shadow = 0.0f;
@@ -118,11 +124,26 @@ float ShadowCalculation(vec3 fragPos)
 }
 
 
-vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir, float shadow)
+vec3 CalcPointLight(PointLight light, mat3 TBN, vec3 fragPos, vec3 viewDir, float shadow)
 {
     vec3 lightDir = normalize(light.position - fragPos);
 
+    //normal = ourNormal;
 
+    vec3 normal;
+    if (scrollNormal)
+    {
+        normal = texture(normalMap, vec2(TexCoord.x, TexCoord.y + (currentFrame * 0.05))).rgb;
+    }
+    else
+    {
+        normal = texture(normalMap, TexCoord).rgb;
+    }
+    
+    //vec3 normal = texture(normalMap, vec2(TexCoord.x, TexCoord.y + (currentFrame * 0.05))).rgb;
+    normal = normal * 2.0 - 1.0;   
+    normal = normalize(TBN * normal); 
+   // normal = ourNormal;
     // diffuse shading
     float diff = max(dot(normal, lightDir), 0.0);
 

@@ -17,11 +17,11 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow* window);
 unsigned int loadTexture(const char* path);
-void renderScene(Shader& shader, unsigned int planeVAO, unsigned int cubeVAO, float currentFrame, unsigned int blockTex, unsigned int floorTex);
+void renderScene(Shader& shader, unsigned int planeVAO, unsigned int cubeVAO, float currentFrame, unsigned int blockTex, unsigned int floorTex, unsigned int floorNormalTex, unsigned int cubeNormalTex);
 
 // settings
-const unsigned int SCR_WIDTH = 1920;
-const unsigned int SCR_HEIGHT = 1080;
+const unsigned int SCR_WIDTH = 800;
+const unsigned int SCR_HEIGHT = 600;
 
 // camera
 Camera camera(glm::vec3(0.0f, 0.0f, 0.0f));
@@ -33,12 +33,12 @@ bool firstMouse = true;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
-//Why is this only accureact when the light is at 0 0 0?
 glm::vec3 lightPos = glm::vec3(0.0f, 0.0f, 0.0f);
 glm::vec3 lightCol = glm::vec3(1.0f, 1.0f, 1.0f);
 
 bool blinn = false;
 bool blinnKeyPressed = false;
+
 
 
 int main()
@@ -103,97 +103,121 @@ int main()
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
-    float cubeVertices[] = { // CCW WINDING ORDER
+    float cubeVertices[] = {
         // Back face
-        // Positions          // Normals         // TexCoords
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f, // Bottom-left
-         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f, // Top-right
-         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f, // Bottom-right         
-         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f, // Top-right
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f, // Bottom-left
-        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f, // Top-left
+        // positions         // normals        // tex coords   // tangents
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,   1.0f, 0.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,   1.0f, 0.0f, 0.0f,
+         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 0.0f,   1.0f, 0.0f, 0.0f,
+
+         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  1.0f, 1.0f,   1.0f, 0.0f, 0.0f,
+        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 0.0f,   1.0f, 0.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,  0.0f, 1.0f,   1.0f, 0.0f, 0.0f,
 
         // Front face
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f, // Bottom-left
-         0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f, // Bottom-right
-         0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f, // Top-right
-         0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   1.0f, 1.0f, // Top-right
-        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 1.0f, // Top-left
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f, // Bottom-left
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f,   1.0f, 0.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 0.0f,   1.0f, 0.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f,   1.0f, 0.0f, 0.0f,
+
+         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f, 1.0f,   1.0f, 0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 1.0f,   1.0f, 0.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.0f, 0.0f,   1.0f, 0.0f, 0.0f,
 
         // Left face
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f, // Top-right
-        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f, // Top-left
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f, // Bottom-left
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f, // Bottom-left
-        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f, // Bottom-right
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f, // Top-right
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f, -1.0f,
+        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 1.0f,   0.0f, 0.0f, -1.0f,
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,   0.0f, 0.0f, -1.0f,
+
+        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,  1.0f, 0.0f,   0.0f, 0.0f, -1.0f,
+        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 0.0f,   0.0f, 0.0f, -1.0f,
+        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f, -1.0f,
 
         // Right face
-         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, // Top-left
-         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f, // Bottom-right
-         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f, // Top-right         
-         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f, // Bottom-right
-         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f, // Top-left
-         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f, // Bottom-left     
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,   0.0f, 0.0f,  1.0f,
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,  1.0f,
+         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 1.0f,   0.0f, 0.0f,  1.0f,
+
+         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 1.0f,   0.0f, 0.0f,  1.0f,
+         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f, 0.0f,   0.0f, 0.0f,  1.0f,
+         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.0f, 0.0f,   0.0f, 0.0f,  1.0f,
 
          // Bottom face
-         -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f, // Top-right
-          0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f, // Top-left
-          0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f, // Bottom-left
-          0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f, // Bottom-left
-         -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f, // Bottom-right
-         -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f, // Top-right
+         -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f, 0.0f,
+          0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 1.0f,   1.0f, 0.0f, 0.0f,
+          0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,   1.0f, 0.0f, 0.0f,
+
+          0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  1.0f, 0.0f,   1.0f, 0.0f, 0.0f,
+         -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 0.0f,   1.0f, 0.0f, 0.0f,
+         -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f, 0.0f,
 
          // Top face
-         -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f, // Top-left
-          0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f, // Bottom-right
-          0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f, // Top-right     
-          0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f, // Bottom-right
-         -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f, // Top-left
-         -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f  // Bottom-left  
-    };
-    float planeVertices[] = {
-        // positions             // normals          // texture Coords
-         15.0f, -0.5f,  15.0f,      0.0f, 1.0f, 0.0f,    2.0f, 0.0f,
-        -15.0f, -0.5f,  15.0f,      0.0f, 1.0f, 0.0f,    0.0f, 0.0f,
-        -15.0f, -0.5f, -15.0f,      0.0f, 1.0f, 0.0f,    0.0f, 2.0f,
+         -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f, 0.0f,
+          0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,   1.0f, 0.0f, 0.0f,
+          0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 1.0f,   1.0f, 0.0f, 0.0f,
 
-         15.0f, -0.5f,  15.0f,      0.0f, 1.0f, 0.0f,    2.0f, 0.0f,
-        -15.0f, -0.5f, -15.0f,      0.0f, 1.0f, 0.0f,    0.0f, 2.0f,
-         15.0f, -0.5f, -15.0f,      0.0f, 1.0f, 0.0f,    2.0f, 2.0f
+          0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f, 0.0f,   1.0f, 0.0f, 0.0f,
+         -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 1.0f,   1.0f, 0.0f, 0.0f,
+         -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.0f, 0.0f,   1.0f, 0.0f, 0.0f
     };
-    // cube VAO
+
+    // Same idea for the plane: 11 floats per vertex
+    float planeVertices[] = {
+        // positions           // normals         // tex coords // tangents
+        15.0f, -0.5f,  15.0f,   0.0f, 1.0f, 0.0f,   2.0f, 0.0f,   1.0f, 0.0f, 0.0f,
+       -15.0f, -0.5f,  15.0f,   0.0f, 1.0f, 0.0f,   0.0f, 0.0f,   1.0f, 0.0f, 0.0f,
+       -15.0f, -0.5f, -15.0f,   0.0f, 1.0f, 0.0f,   0.0f, 2.0f,   1.0f, 0.0f, 0.0f,
+
+        15.0f, -0.5f,  15.0f,   0.0f, 1.0f, 0.0f,   2.0f, 0.0f,   1.0f, 0.0f, 0.0f,
+       -15.0f, -0.5f, -15.0f,   0.0f, 1.0f, 0.0f,   0.0f, 2.0f,   1.0f, 0.0f, 0.0f,
+        15.0f, -0.5f, -15.0f,   0.0f, 1.0f, 0.0f,   2.0f, 2.0f,   1.0f, 0.0f, 0.0f
+    };
+
     unsigned int cubeVAO, cubeVBO;
     glGenVertexArrays(1, &cubeVAO);
     glGenBuffers(1, &cubeVBO);
 
     glBindVertexArray(cubeVAO);
     glBindBuffer(GL_ARRAY_BUFFER, cubeVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), cubeVertices, GL_STATIC_DRAW);
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(cubeVertices), &cubeVertices, GL_STATIC_DRAW);
+    // position attribute
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)0);
+
+    // normal attribute
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(3 * sizeof(float)));
+
+    // texCoord attribute
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(6 * sizeof(float)));
+
+    // tangent attribute
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(8 * sizeof(float)));
+
     glBindVertexArray(0);
-    // plane VAO
+
+    // Plane
     unsigned int planeVAO, planeVBO;
     glGenVertexArrays(1, &planeVAO);
     glGenBuffers(1, &planeVBO);
 
     glBindVertexArray(planeVAO);
     glBindBuffer(GL_ARRAY_BUFFER, planeVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(planeVertices), planeVertices, GL_STATIC_DRAW);
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(planeVertices), &planeVertices, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(1); //noramls
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)0);
+
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(3 * sizeof(float)));
+
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(6 * sizeof(float)));
+
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(8 * sizeof(float)));
 
     glBindVertexArray(0);
 
@@ -233,13 +257,19 @@ int main()
     // load textures
     // -------------
     unsigned int woodTexture = loadTexture("../ShareLib/Resources/wood.png");
-    unsigned int stoneTexture = loadTexture("../ShareLib/Resources/stone.jpg");
+    unsigned int stoneTexture = loadTexture("../ShareLib/Resources/brickwall.jpg");
+    unsigned int waterNormalMap = loadTexture("../ShareLib/Resources/water2_normal.jpg");
+    unsigned int brickNormalMap = loadTexture("../ShareLib/Resources/brickwall_normal.jpg");
+    unsigned int identityNormalMap = loadTexture("../ShareLib/Resources/identity_normal.png");
+
 
     // shader configuration
     // --------------------
     shader.use();
-    //shader.setInt("woodText", 0);
+    //                                      material.diffuse = 0
     glUniform1i(glGetUniformLocation(shader.ID, "shadowMap"), 1);
+    glUniform1i(glGetUniformLocation(shader.ID, "normalMap"), 2);
+    
 
     //POINT LIGHT
     glUniform3fv(glGetUniformLocation(shader.ID, "pointLight.position"), 1, glm::value_ptr(lightPos));  //world space
@@ -323,7 +353,7 @@ int main()
             glClear(GL_DEPTH_BUFFER_BIT); //clear the depth buffer
 
             //glCullFace(GL_FRONT);
-            renderScene(depthShader, planeVAO, cubeVAO, currentFrame, stoneTexture, woodTexture);
+            renderScene(depthShader, planeVAO, cubeVAO, currentFrame, stoneTexture, woodTexture, waterNormalMap, brickNormalMap);
             //glCullFace(GL_BACK);
         }
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -340,16 +370,19 @@ int main()
         glBindTexture(GL_TEXTURE_2D, woodTexture); //We set the uniform for material.diffuse to id 0
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubeMap);    //We set the uniform for depthMap to id 1
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, identityNormalMap);
 
         //Send important stuffs to shader...
         glUniform3fv(glGetUniformLocation(shader.ID, "viewPos"), 1, glm::value_ptr(camera.position));
         glUniform1i(glGetUniformLocation(shader.ID, "blinn"), blinn);
-        if (blinn) glUniform1f(glGetUniformLocation(shader.ID, "material.shininess"), 32.0f); //pow!
-        else glUniform1f(glGetUniformLocation(shader.ID, "material.shininess"), 16.0f);
+        glUniform1i(glGetUniformLocation(shader.ID, "scrollNormal"), true);
+        if (blinn) glUniform1f(glGetUniformLocation(shader.ID, "material.shininess"), 64.0f); //pow!
+        else glUniform1f(glGetUniformLocation(shader.ID, "material.shininess"), 32.0f);
         glUniform1f(glGetUniformLocation(shader.ID, "farPlane"), far);
         glUniform3fv(glGetUniformLocation(shader.ID, "lightPos"), 1, glm::value_ptr(lightPos));
         glUniform3fv(glGetUniformLocation(shader.ID, "pointLight.position"), 1, glm::value_ptr(lightPos));  //world space
-
+        glUniform1f(glGetUniformLocation(shader.ID, "currentFrame"), currentFrame);
 
         //RENDER SCENE------------------------------------------------------------------------------------------------------------
         glm::mat4 view = camera.GetViewMatrix();
@@ -357,7 +390,7 @@ int main()
         glUniformMatrix4fv(glGetUniformLocation(shader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(glGetUniformLocation(shader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
-        renderScene(shader, planeVAO, cubeVAO, currentFrame, stoneTexture, woodTexture);
+        renderScene(shader, planeVAO, cubeVAO, currentFrame, stoneTexture, woodTexture, waterNormalMap, brickNormalMap);
 
 
         //Light (debug)---------------------------------------------------------------------------------------------------
@@ -393,25 +426,38 @@ int main()
     return 0;
 }
 
-void renderScene(Shader& shader, unsigned int planeVAO, unsigned int cubeVAO, float currentFrame, unsigned int blockTex, unsigned int floorTex)
+void renderScene(Shader& shader, unsigned int planeVAO, unsigned int cubeVAO, float currentFrame, unsigned int blockTex, unsigned int floorTex, unsigned int floorNormalTex, unsigned int cubeNormalTex)
 {
     glm::mat4 model = glm::mat4(1.0f);
+    
     glDisable(GL_CULL_FACE); //Cant cull non-closed shapes like plane
     glBindVertexArray(planeVAO);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, floorTex); //We set the uniform for material.diffuse to id 0
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, floorNormalTex);  //use the normla map for the floor
+    if (blinn) glUniform1f(glGetUniformLocation(shader.ID, "material.shininess"), 64.0f); //pow!
+    else glUniform1f(glGetUniformLocation(shader.ID, "material.shininess"), 128.0f);
+    glUniform1i(glGetUniformLocation(shader.ID, "scrollNormal"), true);
 
     model = glm::mat4(1.00f);
     model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
+    //model = glm::rotate(model, glm::radians(currentFrame * 10.0f), glm::vec3(1.0f, 0.0f, 0.0f));
     glUniformMatrix4fv(glGetUniformLocation(shader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
 
+    if (blinn) glUniform1f(glGetUniformLocation(shader.ID, "material.shininess"), 16.0f); //pow!
+    else glUniform1f(glGetUniformLocation(shader.ID, "material.shininess"), 32.0f);
+    glUniform1i(glGetUniformLocation(shader.ID, "scrollNormal"), false);
     //CUBES----------------------------------------------------
     glEnable(GL_CULL_FACE);
     glBindVertexArray(cubeVAO);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, blockTex); //We set the uniform for material.diffuse to id 0
+    
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, cubeNormalTex); 
 
     //Cube 1
     model = glm::mat4(1.0f);
@@ -419,9 +465,6 @@ void renderScene(Shader& shader, unsigned int planeVAO, unsigned int cubeVAO, fl
     model = glm::rotate(model, glm::radians(20.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     glUniformMatrix4fv(glGetUniformLocation(shader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
     glDrawArrays(GL_TRIANGLES, 0, 36);
-
-   
-    
 
     //Cube 2
     model = glm::mat4(1.0f);
