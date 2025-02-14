@@ -91,7 +91,7 @@ int main()
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); //source, destination
     glEnable(GL_CULL_FACE);
-    glEnable(GL_FRAMEBUFFER_SRGB);
+    //glEnable(GL_FRAMEBUFFER_SRGB);
 
 
     // build and compile shaders
@@ -583,14 +583,14 @@ unsigned int loadTexture(char const* path)
         }
         else if (nrComponents == 3)
         {
-            internalFormat = GL_SRGB;
+            internalFormat = GL_RGB;
             format = GL_RGB;
         }
 
         else if (nrComponents == 4)
         {
             internalFormat = GL_RGBA;
-            format = GL_SRGB_ALPHA;
+            format = GL_RGBA;
         }
 
         glBindTexture(GL_TEXTURE_2D, textureID);

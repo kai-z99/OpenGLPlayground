@@ -76,7 +76,10 @@ void main()
     float shadow = ShadowCalculation(FragPos);
     vec3 result = CalcPointLight(pointLight, TBN, FragPos, viewDir, shadow);
 
-    FragColor = vec4(result, 1.0f);
+    float gamma = 2.2;
+    FragColor.rgb = (pow(result.rgb, vec3(1.0/gamma)));
+    FragColor.a = 1.0f;
+    //FragColor = vec4(result, 1.0f);
 
 } 
 
@@ -189,8 +192,12 @@ vec3 CalcPointLight(PointLight light, mat3 TBN, vec3 fragPos, vec3 viewDir, floa
     // combine results
 
     vec3 ambient  = light.ambient  * vec3(texture(material.diffuse, TexCoord));
-    vec3 diffuse  = light.intensity * light.diffuse  * diff * vec3(texture(material.diffuse, TexCoord));
-  
+
+    float gamma = 2.2;
+    vec3 diffuseColor = pow(texture(material.diffuse, TexCoord).rgb, vec3(gamma));
+
+    vec3 diffuse  = light.intensity * light.diffuse  * diff * diffuseColor;
+   
     vec3 specular = light.intensity * light.specular * spec;// * vec3(texture(material.specular, TexCoord)); not using map rn
     //ambient  *= attenuation;
     //diffuse  *= attenuation;

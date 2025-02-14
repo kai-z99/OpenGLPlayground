@@ -572,8 +572,8 @@ unsigned int loadTexture(char const* path)
         }
         else if (nrComponents == 3)
         {
-            format = GL_SRGB;
-            internalFormat = GL_RGB;
+            format = GL_RGB;
+            internalFormat = GL_SRGB;
         }
             
         else if (nrComponents == 4)
@@ -585,7 +585,7 @@ unsigned int loadTexture(char const* path)
 
 
         glBindTexture(GL_TEXTURE_2D, textureID);
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, internalFormat, GL_UNSIGNED_BYTE, data);
+        glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
 
         if (format == GL_RGBA)
