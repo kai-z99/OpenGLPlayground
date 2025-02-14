@@ -11,23 +11,25 @@
 
     out vec2 TexCoord;
     out vec3 FragPos;
-
     out mat3 TBN;
     out vec3 ourNormal;
+    out vec3 ourTangent;
+
+    uniform vec3 lightPos;
 
     void main()
     {
         gl_Position = projection * view * model * vec4(aPos, 1.0);  //frag position in screen space
 
         mat3 normalMatrix = mat3(transpose(inverse(model)));
-        vec3 N = normalMatrix * aNormal;                         //Normal, taking into account non-linear scaling
-        vec3 T = normalMatrix * aTangent;
-        vec3 B = cross(N,T);
+        vec3 N = normalize(normalMatrix * aNormal);                         //Normal, taking into account non-linear scaling
+        vec3 T = normalize(normalMatrix * aTangent);
+        vec3 B = normalize(cross(N,T));
         mat3 tbn = mat3(T, B, N);
-   
-
+         
         TexCoord = aTexCoord;                                      // texture coords
         FragPos = vec3(model * vec4(aPos, 1.0));                   //fragment position in world space
         ourNormal = N;
+        ourTangent = T;
         TBN = tbn;
     }

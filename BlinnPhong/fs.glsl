@@ -149,7 +149,7 @@ float ShadowCalculation(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir )
 vec3 CalcDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir, float shadow)
 {
     vec3 lightDir = normalize(-light.direction);
-
+    //return lightDir;
     // diffuse shading
     float diff = max(dot(normal, lightDir), 0.0);
 

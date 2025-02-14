@@ -52,6 +52,7 @@ float ShadowCalculation(vec3 lightPos);
 
 in vec2 TexCoord;
 in vec3 ourNormal;
+in vec3 ourTangent;
 in vec3 FragPos;
 in mat3 TBN;
 
@@ -129,8 +130,9 @@ vec3 CalcPointLight(PointLight light, mat3 TBN, vec3 fragPos, vec3 viewDir, floa
     vec3 lightDir = normalize(light.position - fragPos);
 
     //normal = ourNormal;
-
+    
     vec3 normal;
+    
     if (scrollNormal)
     {
         normal = texture(normalMap, vec2(TexCoord.x, TexCoord.y + (currentFrame * 0.05))).rgb;
@@ -141,12 +143,25 @@ vec3 CalcPointLight(PointLight light, mat3 TBN, vec3 fragPos, vec3 viewDir, floa
     }
     
     //vec3 normal = texture(normalMap, vec2(TexCoord.x, TexCoord.y + (currentFrame * 0.05))).rgb;
-    normal = normal * 2.0 - 1.0;   
+    //normal = texture(normalMap, TexCoord).rgb;
+    normal = normal * 2.0 - 1.0; 
+    
     normal = normalize(TBN * normal); 
-   // normal = ourNormal;
+    //normal = ourNormal;
+    //normal = ourTangent;
+    //if (normal.z > 0.5) return vec3(0.0f, 1.0f, 0.0f);
+    //else return vec3(1.0f, 0.0f, 0.0f);
+
+    //return vec3(normal);
+
+    //normal = ourNormal;
     // diffuse shading
+
     float diff = max(dot(normal, lightDir), 0.0);
 
+   // return lightDir;
+    //return vec3(diff, diff, diff);
+    
     // specular shading
     vec3 reflectDir = reflect(-lightDir, normal);
     vec3 halfwayDir = normalize(lightDir + viewDir);
@@ -172,12 +187,13 @@ vec3 CalcPointLight(PointLight light, mat3 TBN, vec3 fragPos, vec3 viewDir, floa
     //float attenuation = 1.0 / (distance * distance); //quadratic attenuation
 
     // combine results
+
     vec3 ambient  = light.ambient  * vec3(texture(material.diffuse, TexCoord));
     vec3 diffuse  = light.intensity * light.diffuse  * diff * vec3(texture(material.diffuse, TexCoord));
+  
     vec3 specular = light.intensity * light.specular * spec;// * vec3(texture(material.specular, TexCoord)); not using map rn
-
     //ambient  *= attenuation;
-    diffuse  *= attenuation;
+    //diffuse  *= attenuation;
     specular *= attenuation;
 
     return (ambient + (1.0f - shadow) * (diffuse + specular));
