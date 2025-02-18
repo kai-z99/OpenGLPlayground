@@ -77,7 +77,7 @@ void main()
     vec3 result = CalcPointLight(pointLight, TBN, FragPos, viewDir, shadow);
 
     float gamma = 2.2;
-    FragColor.rgb = (pow(result.rgb, vec3(1.0/gamma)));
+    FragColor.rgb = (pow(result.rgb, vec3(1.0/gamma))); //gamma correcttion
     FragColor.a = 1.0f;
     //FragColor = vec4(result, 1.0f);
 
@@ -149,7 +149,7 @@ vec3 CalcPointLight(PointLight light, mat3 TBN, vec3 fragPos, vec3 viewDir, floa
     //normal = texture(normalMap, TexCoord).rgb;
     normal = normal * 2.0 - 1.0; 
     
-    normal = normalize(TBN * normal); 
+    normal = normalize(TBN * normal); //transform normal from tangent space to world space
     //normal = ourNormal;
     //normal = ourTangent;
     //if (normal.z > 0.5) return vec3(0.0f, 1.0f, 0.0f);
