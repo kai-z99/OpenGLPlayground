@@ -1,5 +1,6 @@
 #version 330 core
-out vec4 FragColor;
+layout (location = 0) out vec4 FragColor;
+layout (location = 1) out vec4 BrightColor;
 
 in vec2 TexCoord;
 
@@ -32,10 +33,15 @@ void main()
     }
     
     float gamma = 2.2;
-    vec3 sceneAmbient = vec3(0.015f, 0.015f, 0.015f) * pow(texture(texture1, TexCoord).rgb, vec3(gamma));
+    vec3 sceneAmbient = vec3(0.015f, 0.015f, 0.015f) * pow(texture(texture1, TexCoord).rgb, vec3(gamma)); //degamma
     color += sceneAmbient;
 
     FragColor = vec4(color, 1.0f);
+
+    float brightness = dot(FragColor.rgb, vec3(0.2126, 0.7152, 0.0722));
+    if (brightness > 1.0) BrightColor = vec4(color, 1.0);
+    else BrightColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
     //FragColor = vec4((pow(color.rgb, vec3(1.0/gamma))), 1.0f); //gamma correcttion
     
     
@@ -63,7 +69,7 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 
     // combine results
     float gamma = 2.2;
-    vec3 diffuseColor = pow(texture(texture1, TexCoord).rgb, vec3(gamma));
+    vec3 diffuseColor = pow(texture(texture1, TexCoord).rgb, vec3(gamma)); //degamma
 
 
     vec3 diffuse  = light.color  * diff * diffuseColor;

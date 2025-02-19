@@ -238,6 +238,7 @@ int main()
     glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubeMap);
 
     //attach each face with its texture. This texture is empty and just has GL_DEPTH_COMPONENT
+    //Note: cant use rbo because we have to sample the depth map in shader
     const unsigned int SHADOW_WIDTH = 1024, SHADOW_HEIGHT = 1024;
     for (unsigned int i = 0; i < 6; ++i)
     {

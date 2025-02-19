@@ -25,5 +25,6 @@
     <None Include="fsLight.glsl" />
     <None Include="fsHDR.glsl" />
     <None Include="vsHDR.glsl" />
+    <None Include="fsBlur.glsl" />
   </ItemGroup>
 </Project>

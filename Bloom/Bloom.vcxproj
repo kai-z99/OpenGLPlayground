@@ -137,6 +137,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="fs1.glsl" />
+    <None Include="fsBlur.glsl" />
     <None Include="fsHDR.glsl" />
     <None Include="fsLight.glsl" />
     <None Include="vs1.glsl" />
