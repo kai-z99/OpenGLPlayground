@@ -199,8 +199,10 @@ vec3 CalcPointLight(PointLight light, mat3 TBN, vec3 fragPos, vec3 viewDir, floa
     vec2 ssaoUV = ndc.xy * 0.5f + 0.5f;
 
     float occlusion = texture(ssaoTexture, ssaoUV).r;
+    if (blinn) ambient *= occlusion;
+    
+    //return vec3(occlusion);
 
-    ambient *= occlusion;
     //return ambient;
     float gamma = 2.2;
     vec3 diffuseColor = pow(texture(material.diffuse, TexCoord).rgb, vec3(gamma));

@@ -35,10 +35,10 @@ void main()
 		vec3 samplePos = TBN * samples[i]; //convert hemisphere sample from tangent to view space
 		samplePos = fragPos + samplePos * radius; //radius changes hemisphere size
 
-		//project sample position to NDC so we can smaple the depth texture
+		//project sample position to 0,1 so we can smaple the depth texture
 		vec4 offset = vec4(samplePos, 1.0f);
 		offset = projection * offset; //clip space
-		offset.xyz /= offset.w; //perspective divide to [-1,1]
+		offset.xyz /= offset.w; //perspective divide to [-1,1] NDC
 		offset.xyz = (offset.xyz * 0.5f) + 0.5f; //bring to [0,1] ready to sample depth texture
 
 		float sampleDepth = texture(gPosition, offset.xy).z; //view-space depth value of the sampled fragment
@@ -49,5 +49,5 @@ void main()
 
 	occlusion = 1.0f - (occlusion / kernelSize);
 	FragColor = occlusion;
-
+	//FragColor = 1.0;
 }

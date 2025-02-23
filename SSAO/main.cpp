@@ -182,13 +182,13 @@ int main()
 
     float quadVertices[] = {
         // positions   // texCoords
-        -1.0f,  1.0f,  0.0f, 1.0f,
-        -1.0f, -1.0f,  0.0f, 0.0f,
-         1.0f, -1.0f,  1.0f, 0.0f,
+        -1.0f,  1.0f, 0.0f,  0.0f, 1.0f,
+        -1.0f, -1.0f, 0.0f,  0.0f, 0.0f,
+         1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
 
-        -1.0f,  1.0f,  0.0f, 1.0f,
-         1.0f, -1.0f,  1.0f, 0.0f,
-         1.0f,  1.0f,  1.0f, 1.0f
+        -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+         1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+         1.0f,  1.0f, 0.0f, 1.0f, 1.0f
     };
 
 
@@ -252,15 +252,10 @@ int main()
 
     glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0); //pos
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(1); //tex
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
     glBindVertexArray(0);
-
-
-
-
-
 
 
     //FRAME BUFFER FOR SHADOWMAP-----------------------------------------------------------------------------
@@ -360,8 +355,9 @@ int main()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ssaoColorBuffer, 0);
-
-
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+        std::cout << "Framebuffer not complete!" << std::endl;
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
 
     //---------------------------------------------------------
@@ -426,7 +422,7 @@ int main()
     glUniform3fv(glGetUniformLocation(shader.ID, "pointLight.ambient"), 1, glm::value_ptr(glm::vec3(0.025, 0.025, 0.025))); //basically global ambient since only one light in scene
     glUniform3fv(glGetUniformLocation(shader.ID, "pointLight.diffuse"), 1, glm::value_ptr(lightCol));      //what color does diffuse paint? I choose lightColor
     glUniform3fv(glGetUniformLocation(shader.ID, "pointLight.specular"), 1, glm::value_ptr(lightCol));     //what color does specular paint? I choose lightColor
-    glUniform1f(glGetUniformLocation(shader.ID, "pointLight.intensity"), 2.2f);
+    glUniform1f(glGetUniformLocation(shader.ID, "pointLight.intensity"), 1.7f);
     glUniform1f(glGetUniformLocation(shader.ID, "pointLight.constant"), 1.0f); // Constant attenuation
     glUniform1f(glGetUniformLocation(shader.ID, "pointLight.linear"), 0.09f);  // Linear attenuation
     glUniform1f(glGetUniformLocation(shader.ID, "pointLight.quadratic"), 0.032f); // Quadratic attenuation
@@ -519,9 +515,9 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         //move the light around
-        lightPos.y = 3 * ((1.0f + sinf(currentFrame)) / 2);
-        lightPos.x = 3 * sinf(currentFrame);
-        lightPos.z = 2 * cosf(currentFrame);
+        //lightPos.y = 3 * ((1.0f + sinf(currentFrame)) / 2);
+        //lightPos.x = 3 * sinf(currentFrame);
+        //lightPos.z = 2 * cosf(currentFrame);
 
         //FIRST PASS: RENDER DEPTHMAP------------------------------------------------------------------------------------
         //--------------------------------------------------------------------------------------------------------------
@@ -568,7 +564,6 @@ int main()
         //SECOND PASS: GEOMETRY PASS, RENDER SCENE NORMALS AND DEPTH IN GBUFFER---------------------------------------------------------------------------
         //---------------------------------------------------------------------------------------------------------
         glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
-           // glClearColor(1.00, 1.0f, 1.0f, 0.4f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
             geoShader.use();
@@ -589,7 +584,8 @@ int main()
         //THIRD PASS: RENDER SSAO TEXTURE---------------------------------------------------------------------------
         //---------------------------------------------------------------------------------------------------------
         glBindFramebuffer(GL_FRAMEBUFFER, ssaoFBO);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT);
+        glDisable(GL_BLEND);
         ssaoShader.use();
         
         glUniformMatrix4fv(glGetUniformLocation(ssaoShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
@@ -611,7 +607,7 @@ int main()
         glBindVertexArray(quadVAO);
         glDrawArrays(GL_TRIANGLES, 0, 6);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
+        glEnable(GL_BLEND);
         //------------------------------------------------------------------------------------------------------------
         //4TH PASS: RENDER SCENE NORMALY---------------------------------------------------------------------------
         //---------------------------------------------------------------------------------------------------------
@@ -668,7 +664,7 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glUniform1i(glGetUniformLocation(screenShader.ID, "scene"), 1);
         glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, ssaoColorBuffer);
+        glBindTexture(GL_TEXTURE_2D, textureColorBuffer);
         glBindVertexArray(quadVAO);
         glDrawArrays(GL_TRIANGLES, 0, 6);
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
