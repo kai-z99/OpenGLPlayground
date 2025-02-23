@@ -64,8 +64,10 @@ uniform vec3 lightPos;
 uniform float farPlane;
 uniform float currentFrame;
 uniform bool scrollNormal;
+uniform mat4 projection;
+uniform mat4 view;
 
-
+uniform sampler2D ssaoTexture;
 
 void main()
 {             
@@ -186,13 +188,20 @@ vec3 CalcPointLight(PointLight light, mat3 TBN, vec3 fragPos, vec3 viewDir, floa
     
     float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));    
     
-
+    
     //float attenuation = 1.0 / (distance * distance); //quadratic attenuation
-
-    // combine results
 
     vec3 ambient  = light.ambient  * vec3(texture(material.diffuse, TexCoord));
 
+    //Transform from world space to clip space
+    vec4 clipSpacePos = projection * view * vec4(FragPos, 1.0);
+    vec3 ndc = clipSpacePos.xyz / clipSpacePos.w; //perspective divide
+    vec2 ssaoUV = ndc.xy * 0.5f + 0.5f;
+
+    float occlusion = texture(ssaoTexture, ssaoUV).r;
+
+    ambient *= occlusion;
+    //return ambient;
     float gamma = 2.2;
     vec3 diffuseColor = pow(texture(material.diffuse, TexCoord).rgb, vec3(gamma));
 
@@ -205,34 +214,3 @@ vec3 CalcPointLight(PointLight light, mat3 TBN, vec3 fragPos, vec3 viewDir, floa
 
     return (ambient + (1.0f - shadow) * (diffuse + specular));
 } 
-
-/*
-vec3 CalcDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir, float shadow)
-{
-    vec3 lightDir = normalize(-light.direction);
-
-    // diffuse shading
-    float diff = max(dot(normal, lightDir), 0.0);
-
-    // specular shading
-
-    float spec;
-
-    if (blinn)
-    {
-        vec3 halfwayDir = normalize(lightDir + viewDir);
-        spec = pow(max(dot(halfwayDir, normal), 0.0), material.shininess);
-    }
-    else
-    {
-        vec3 reflectDir = reflect(-lightDir, normal);
-        spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-    }
-
-    // combine results
-    vec3 ambient  = light.ambient  * vec3(texture(material.diffuse, TexCoord));
-    vec3 diffuse  = light.intensity * light.diffuse  * diff * vec3(texture(material.diffuse, TexCoord)); //light.diffuse is the color is paints(lightCol?), the texture is the texture where its painted on top of (woodTexture)
-    vec3 specular = light.intensity * light.specular * spec; // vec3(texture(material.specular, TexCoord)); light.specular is the color it paints (lightCol?)
-    return (ambient + (1.0f - shadow) * (diffuse + specular));
-}  
-*/

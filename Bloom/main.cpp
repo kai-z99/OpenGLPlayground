@@ -240,8 +240,6 @@ int main()
     glBindVertexArray(0);
 
 
-
-
     //HDR framebuffer------------------------------------------------------------------------------------------------------------------------------------
     //This framebuffer holds the scene and also the bright-only scene in 2 color attachments-------------------------------------------------------------
     unsigned int hdrFBO; //create framebuffer
@@ -416,7 +414,7 @@ int main()
             model = glm::mat4(1.0f);
             glm::vec3 lightPos = lightPositions[i];
             model = glm::translate(model, glm::vec3(lightPos));
-            model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
+            model = glm::scale(model, glm::vec3(0.5f, 0.5f, 0.5f));
             glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
             glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
             glUniformMatrix4fv(glGetUniformLocation(lightShader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
@@ -447,7 +445,7 @@ int main()
         //Now write to blur buffers to get a quad with the blurred bright scene (to be combined with hdr buffer)
         bool horizontal = true;
         bool first = true;
-        unsigned int amount = 10; //back and forth 5 times
+        unsigned int amount = 12; //6 passes
 
         blurShader.use();
 

@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{3f232ee4-de84-4472-bc29-d7a4480b538c}</ProjectGuid>
-    <RootNamespace>Template</RootNamespace>
+    <ProjectGuid>{05adebcc-a7e8-4948-ba2d-c4a5d56ed393}</ProjectGuid>
+    <RootNamespace>SSAO</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -137,7 +137,15 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="fs1.glsl" />
-    <None Include="vs1.glsl" />
+    <None Include="fsDebug.glsl" />
+    <None Include="fsGeo.glsl" />
+    <None Include="fsLight.glsl" />
+    <None Include="fsShadow.glsl" />
+    <None Include="fsSSAO.glsl" />
+    <None Include="vs.glsl" />
+    <None Include="vsGeo.glsl" />
+    <None Include="vsShadow.glsl" />
+    <None Include="vsSSAO.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

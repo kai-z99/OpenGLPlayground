@@ -27,6 +27,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PointShadows", "PointShadow
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Bloom", "Bloom\Bloom.vcxproj", "{622D330C-3475-4E5E-AF5C-21F4929646FE}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SSAO", "SSAO\SSAO.vcxproj", "{05ADEBCC-A7E8-4948-BA2D-C4A5D56ED393}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -123,6 +125,14 @@ Global
 		{622D330C-3475-4E5E-AF5C-21F4929646FE}.Release|x64.Build.0 = Release|x64
 		{622D330C-3475-4E5E-AF5C-21F4929646FE}.Release|x86.ActiveCfg = Release|Win32
 		{622D330C-3475-4E5E-AF5C-21F4929646FE}.Release|x86.Build.0 = Release|Win32
+		{05ADEBCC-A7E8-4948-BA2D-C4A5D56ED393}.Debug|x64.ActiveCfg = Debug|x64
+		{05ADEBCC-A7E8-4948-BA2D-C4A5D56ED393}.Debug|x64.Build.0 = Debug|x64
+		{05ADEBCC-A7E8-4948-BA2D-C4A5D56ED393}.Debug|x86.ActiveCfg = Debug|Win32
+		{05ADEBCC-A7E8-4948-BA2D-C4A5D56ED393}.Debug|x86.Build.0 = Debug|Win32
+		{05ADEBCC-A7E8-4948-BA2D-C4A5D56ED393}.Release|x64.ActiveCfg = Release|x64
+		{05ADEBCC-A7E8-4948-BA2D-C4A5D56ED393}.Release|x64.Build.0 = Release|x64
+		{05ADEBCC-A7E8-4948-BA2D-C4A5D56ED393}.Release|x86.ActiveCfg = Release|Win32
+		{05ADEBCC-A7E8-4948-BA2D-C4A5D56ED393}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -131,6 +141,7 @@ Global
 		SolutionGuid = {4D0213C8-C38C-4D6F-B8BE-A7E394F1E49C}
 	EndGlobalSection
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		ShareLib\ShareLib.vcxitems*{05adebcc-a7e8-4948-ba2d-c4a5d56ed393}*SharedItemsImports = 4
 		ShareLib\ShareLib.vcxitems*{3f232ee4-de84-4472-bc29-d7a4480b538c}*SharedItemsImports = 4
 		ShareLib\ShareLib.vcxitems*{59cf8dcf-6b4b-4de9-a2bd-04f34a5c3f1b}*SharedItemsImports = 4
 		ShareLib\ShareLib.vcxitems*{622d330c-3475-4e5e-af5c-21f4929646fe}*SharedItemsImports = 4
