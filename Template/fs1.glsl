@@ -21,12 +21,12 @@ uniform vec3 viewPos;
 
 void main()
 {          
-    
+    vec3 normal = normalize(ourNormal);
     vec3 color = vec3(0.0f);
 
     vec3 viewDir = normalize(viewPos - FragPos);
 
-    color += CalcPointLight(pointLight, ourNormal, FragPos, viewDir);
+    color += CalcPointLight(pointLight, normal, FragPos, viewDir);
 
     float gamma = 2.2;
     vec3 sceneAmbient = vec3(0.015f, 0.015f, 0.015f) * pow(texture(texture_diffuse1, TexCoords).rgb, vec3(gamma)); //degamma
@@ -38,6 +38,7 @@ void main()
 
 vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 {
+    
     vec3 lightDir = normalize(light.position - fragPos);
 
     // diffuse shading
@@ -60,8 +61,8 @@ vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
     float gamma = 2.2;
     vec3 diffuseColor = pow(texture(texture_diffuse1, TexCoords).rgb, vec3(gamma)); //degamma
 
-    vec3 diffuse  = light.color  * diff * diffuseColor;
-    vec3 specular = 2.0 * light.color  * spec * vec3(texture(texture_specular1, TexCoords));
+    vec3 diffuse  = 3 * light.color  * diff * diffuseColor;
+    vec3 specular = 3 * light.color  * spec * vec3(texture(texture_specular1, TexCoords));
 
     //ambient  *= attenuation;
     diffuse  *= attenuation;
