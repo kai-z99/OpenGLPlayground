@@ -332,7 +332,7 @@ int main()
     glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
-
+    
     // finally check if framebuffer is complete
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
         std::cout << "Framebuffer not complete!" << std::endl;
@@ -515,9 +515,9 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         //move the light around
-        //lightPos.y = 3 * ((1.0f + sinf(currentFrame)) / 2);
-        //lightPos.x = 3 * sinf(currentFrame);
-        //lightPos.z = 2 * cosf(currentFrame);
+        lightPos.y = 3 * ((1.0f + sinf(currentFrame)) / 2);
+        lightPos.x = 3 * sinf(currentFrame);
+        lightPos.z = 2 * cosf(currentFrame);
 
         //FIRST PASS: RENDER DEPTHMAP------------------------------------------------------------------------------------
         //--------------------------------------------------------------------------------------------------------------
@@ -657,8 +657,6 @@ int main()
         glBindVertexArray(0);
         //END LIGHT-------------------------------------------------------------------------------------------------------
 
-        //END SECOND PASS---------------------------------------------------------------------------------------------------
-        //------------------------------------------------------------------------------------------------------------------
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         screenShader.use();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

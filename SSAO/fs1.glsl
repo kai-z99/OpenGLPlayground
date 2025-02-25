@@ -195,8 +195,8 @@ vec3 CalcPointLight(PointLight light, mat3 TBN, vec3 fragPos, vec3 viewDir, floa
 
     //Transform from world space to clip space
     vec4 clipSpacePos = projection * view * vec4(FragPos, 1.0);
-    vec3 ndc = clipSpacePos.xyz / clipSpacePos.w; //perspective divide
-    vec2 ssaoUV = ndc.xy * 0.5f + 0.5f;
+    vec3 ndc = clipSpacePos.xyz / clipSpacePos.w; //perspective divide to -1, 1
+    vec2 ssaoUV = ndc.xy * 0.5f + 0.5f; //move to 0,1
 
     float occlusion = texture(ssaoTexture, ssaoUV).r;
     if (blinn) ambient *= occlusion;

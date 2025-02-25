@@ -8,6 +8,7 @@
 
 #include "Shader.h" //sharelib is a refrence to this project, no need for path
 #include "Camera.h"
+#include "Model.h"
 
 #include <iostream>
 #include <vector>
@@ -88,6 +89,8 @@ int main()
     // build and compile shaders
     // -------------------------
     Shader shader("vs1.glsl", "fs1.glsl");
+    stbi_set_flip_vertically_on_load(true);
+    Model backpack("../ShareLib/Resources/backpack/backpack.obj");
 
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
@@ -245,8 +248,7 @@ int main()
     // shader configuration
     // --------------------
     shader.use();
-    shader.setInt("texture1", 0);
-
+    shader.setInt("texture_diffuse1", 0);
 
 
     // render loop
@@ -259,13 +261,15 @@ int main()
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
+
+
         // input
         // -----
         processInput(window);
 
         // render
         // ------
-        glClearColor(0.71, 0.9f, 0.949f, 0.4f);
+        glClearColor(0, 0,0, 0.4f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         shader.use();
@@ -274,14 +278,17 @@ int main()
         glUniformMatrix4fv(glGetUniformLocation(shader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(glGetUniformLocation(shader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
         glUniform3fv(glGetUniformLocation(shader.ID, "viewPos"), 1, glm::value_ptr(camera.position));
-        glUniform3fv(glGetUniformLocation(shader.ID, "pointLight.position"), 1, glm::value_ptr(glm::vec3(0.0f, 2.0f, 0.0f)));
+        glUniform3fv(glGetUniformLocation(shader.ID, "pointLight.position"), 1, glm::value_ptr(glm::vec3(cosf(currentFrame) * 3, 2.0f, sinf(currentFrame) * 3)));
         glUniform3fv(glGetUniformLocation(shader.ID, "pointLight.color"), 1, glm::value_ptr(glm::vec3(1.0f, 1.0f, 1.0f)));
 
 
         renderScene(shader, cubeVAO, planeVAO, floorTexture, cubeTexture);
 
-
-
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, 1.0f, 0.0f)); 
+        model = glm::scale(model, glm::vec3(0.8f, 0.8f, 0.8f));
+        glUniformMatrix4fv(glGetUniformLocation(shader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        backpack.Draw(shader);
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
@@ -423,7 +430,7 @@ void renderScene(Shader& shader, unsigned int cubeVAO, unsigned int planeVAO, un
     glBindTexture(GL_TEXTURE_2D, floorTex);
 
     glm::mat4 model = glm::mat4(1.0f);
-
+    glUniformMatrix4fv(glGetUniformLocation(shader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
     glDrawArrays(GL_TRIANGLES, 0, 6); //draw plane
     glBindVertexArray(0);
     //----------------------------------------------------------
@@ -443,12 +450,12 @@ void renderScene(Shader& shader, unsigned int cubeVAO, unsigned int planeVAO, un
 
     //Cube 2
     model = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3(0.0f, 0.0f, 3.0f));
     glUniformMatrix4fv(glGetUniformLocation(shader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
     glBindVertexArray(0);
     //----------------------------------------------------------
-
 }
 
 //Note for sharelib: originally you have to have the folder glad/glad.c in the same directory as main. We move that to
