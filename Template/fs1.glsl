@@ -18,7 +18,6 @@ in vec3 FragPos;
 in vec3 ourNormal;
 uniform vec3 viewPos;
 
-
 void main()
 {          
     vec3 normal = normalize(ourNormal);
