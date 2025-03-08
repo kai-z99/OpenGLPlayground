@@ -20,34 +20,23 @@ int main()
 
 		ke.ClearScreen(Vec4(0.2f, 0.2f, 0.2f, 0.4f));
 
-		//TODO: Change diffuse texture here
-		//ke.setTexture(const char* path); //so this works
+		
+
+		//ke.DrawPointLight(Vec3(0.0f, 4.0f, 0.0f), Vec3(1.0f, 1.0f, 1.0f), 5.0f);
+		//ke.DrawPointLight(Vec3(4.0f, 1.0f, cosf(ke.GetCurrentFrame())), Vec3(1.0f, 1.0f, 0.5f), 2.0f);
+		ke.DrawDirLight(Vec3(1.0f, -1.0f, 1.0f), Vec3(1.0f, 1.0f, 1.0f), 0.5);
+		ke.DrawLightsDebug();
 
 		ke.SetCurrentDiffuseTexture("../ShareLib/Resources/wood.png");
 		ke.SetCurrentNormalTexture("../ShareLib/Resources/brickwall_normal.jpg");
-
-		ke.DrawPointLight(Vec3(0.0f, 4.0f, 0.0f), Vec3(1.0f, 1.0f, 1.0f), 5.0f);
-		ke.DrawPointLight(Vec3(4.0f, 1.0f, cosf(ke.GetCurrentFrame())), Vec3(1.0f, 1.0f, 0.5f), 2.0f);
-		//ke.DrawDirLight(Vec3(1.0f, -1.0f, 1.0f), Vec3(1.0f, 0.8f, 1.0f), 0.1);
-
-		ke.DrawLightsDebug();
-
-		
 
 		//Make it so size is vec2 so you dont collapse
 		//also make iut so its actually 1x1
 		ke.DrawPlane(
 			Vec3(0.0f, -0.5f, 0.0f),		//pos
-			Vec3(20.0f, 1.0f, 20.0f),		//size
+			Vec2(20.0f, 20.0f),				//size
 			Vec4(0.0f, 1.0f, 0.0f, 0.0f)	//rot
 		);
-		
-		//m.draw();
-
-		/*
-		ke.PointLIight(pos, bright, col, shadow=false)
-		ke.DirLight(dir, shadow=true)
-		*/
 
 		ke.DrawTriangle(
 			Vec3(0.0f, 0.0f, 0.0f),
@@ -69,7 +58,6 @@ int main()
 		);
 
 		ke.EndFrame();
-
 	}
 
 	return 0;
