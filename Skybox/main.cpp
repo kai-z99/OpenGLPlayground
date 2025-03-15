@@ -330,7 +330,6 @@ int main()
         "../ShareLib/Resources/skybox/back.jpg"
     };
 
-    
     unsigned int cubeMapTexture = loadCubemap(faces);
     shader.use();
     shader.setInt("skybox", 0);

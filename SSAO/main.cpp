@@ -292,11 +292,6 @@ int main()
     glReadBuffer(GL_NONE); //No need for color buffer
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-
-
-
-
-
     //Normal and Depth viewspace buffer-----------------------------------------------------------------
     unsigned int gBuffer;
     glGenFramebuffers(1, &gBuffer);

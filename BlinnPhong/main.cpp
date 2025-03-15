@@ -396,7 +396,6 @@ int main()
         glUniformMatrix4fv(glGetUniformLocation(shader.ID, "lightSpaceMatrix"), 1, GL_FALSE, glm::value_ptr(lightSpaceMatrix)); //for comparison to depthMap
         glUniform3fv(glGetUniformLocation(shader.ID, "directionalLight.direction"), 1, glm::value_ptr(lightDir));  //world space
         
-
         //RENDER SCENE------------------------------------------------------------------------------------------------------------
         //PLANE----------------------------------------------------
         glDisable(GL_CULL_FACE); //Cant cull non-closed shapes like plane
