@@ -2,14 +2,12 @@
 
 int main()
 {
-	KoopaEngine ke = KoopaEngine();	
+	KoopaEngine ke = KoopaEngine();
 
 	/*
 	ke.AO(true);
 	he.bloom(false);
-	he.gamma();
 	*/
-
 
 	//Model m;
 	//TODO: Draw calls shouldnt be attached to a shader.
@@ -18,8 +16,9 @@ int main()
 	//TODO: handle if dhadowmap logic if theres no dirLight.
 	//TODO: Handle cubemap loading and drawing. Probbaly want it to be perframe draw to be consistant.
 	//TODO: make a thing where you can choose to stbi_set_flip_vertically_on_load for each face.
-
-	const char* normalPath = "";
+	//TODO: make it so expanding a the scale changes so that it repeats the texture instead of stretches it.
+	//TODO: handle multiple point lights. Note: right now every pl uses shadowmap for first pl.
+	//TODO: enable/disable bloom
 	/*
 	std::vector<const char*> faces =
 	{
@@ -52,24 +51,32 @@ int main()
 		"../ShareLib/Resources/interstellar/zpos.png"
 	};
 
-	//ke.SetSkybox(faces);
+	ke.SetSkybox(faces);
 	ke.SetDrawLightsDebug(true);
-
+	ke.SetCameraExposure(0.5f);
 	while (!ke.shouldCloseWindow())
 	{
 		ke.BeginFrame();
 
 		ke.ClearScreen(Vec4(0.2f, 0.2f, 0.2f, 0.4f));
 
-
-		ke.DrawPointLight(Vec3(0.0f, 3.0f, 0.0f), Vec3(0.2f, 0.2f, 1.0f), 25.0f);
-		ke.DrawPointLight(Vec3(4.0f, 1.0f, cosf(ke.GetCurrentFrame())), Vec3(1.0f, 1.0f, 0.5f), 2.0f);
-		ke.DrawDirLight(Vec3(-1.0f, -1.0f, -0.5f), Vec3(1.0f, 1.0f, 1.0f), 0.5, true);
+		ke.DrawPointLight(Vec3(0.0f, 3.0f, -1.0f), Vec3(1.0f, 1.0f, 1.0f), 8.0f, true);
+		ke.DrawPointLight(Vec3(4.0f, 1.0f, cosf(ke.GetCurrentFrame())), Vec3(0.5f, 0.2f, 1.0f), 5.0f, false);
+		//ke.DrawPointLight(Vec3(1.0f, 1 + sinf(ke.GetCurrentFrame()), 1.0f), Vec3(0.1f, 0.8f, 1.0f), 2.0f, true);
+		//ke.DrawDirLight(Vec3(-1.0f, -1.0f, -0.5f), Vec3(1.0f, 1.0f, 1.0f), 1.0, true);
 
 		ke.DrawPlane(
-			Vec3(0.0f, -0.5f, 0.0f),		//pos
+			Vec3(0, -0.5f, 0),				//pos
 			Vec2(20.0f, 20.0f),				//size
 			Vec4(0.0f, 1.0f, 0.0f, 0.0f)	//rot
+		);
+		ke.SetCurrentDiffuseTexture(Vec3(1.0f, 0.5f, 0.24f));
+		ke.SetCurrentNormalTexture("../ShareLib/Resources/brickwall_normal.jpg");
+
+		ke.DrawPlane(
+			Vec3(0, 9.5f, -10.0f),			//pos
+			Vec2(20.0f, 20.0f),				//size
+			Vec4(1.0f, 0.0f, 0.0f, 90.0f)	//rot
 		);
 		ke.SetCurrentDiffuseTexture(Vec3(1.0f, 0.5f, 0.24f));
 		ke.SetCurrentNormalTexture("../ShareLib/Resources/brickwall_normal.jpg");
@@ -87,10 +94,18 @@ int main()
 			Vec3(1.0f, 1.0f, 1.0f),
 			Vec4(0.0f, 1.0f, 0.0f, 20.0f)
 		);
+		//ke.SetCurrentDiffuseTexture("../ShareLib/Resources/brickwall.jpg");
+		ke.SetCurrentNormalTexture("../ShareLib/Resources/brickwall_normal.jpg");
+
+		ke.DrawCube(
+			Vec3(0.0f, 0.0f, 3.0f),
+			Vec3(2.0f, 1.0f, 1.0f),
+			Vec4(0.0f, 1.0f, 0.0f, 40.0f)
+		);
 		ke.SetCurrentDiffuseTexture("../ShareLib/Resources/brickwall.jpg");
 		ke.SetCurrentNormalTexture("../ShareLib/Resources/brickwall_normal.jpg");
 
-		ke.EndFrame();
+ 		ke.EndFrame();
 	}
 
 	return 0;

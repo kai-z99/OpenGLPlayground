@@ -257,6 +257,8 @@ int main()
     //glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCubeMap, 0); not using geometry shader
     glDrawBuffer(GL_NONE); //No need for color buffer, just depth
     glReadBuffer(GL_NONE); //No need for color buffer
+
+    
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     // load textures
@@ -357,9 +359,10 @@ int main()
             glUniformMatrix4fv(glGetUniformLocation(depthShader.ID, "lightSpaceMatrix"), 1, GL_FALSE, glm::value_ptr(shadowTransforms[i]));
             glClear(GL_DEPTH_BUFFER_BIT); //clear the depth buffer
 
+
             //glCullFace(GL_FRONT);
             renderScene(depthShader, planeVAO, cubeVAO, currentFrame, stoneTexture, woodTexture, waterNormalMap, brickNormalMap);
-            //glCullFace(GL_BACK);
+            //glCullFace(GL_BACK);  
         }
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
