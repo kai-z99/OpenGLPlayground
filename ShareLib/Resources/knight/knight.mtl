@@ -1,0 +1,41 @@
+# Blender 4.4.0 MTL File: 'None'
+# www.blender.org
+
+newmtl MAT_CLOTH
+Ns 63.117920
+Ka 0.500000 0.500000 0.500000
+Kd 0.409639 0.409639 0.409639
+Ks 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 3
+map_Kd T_cloth_D.png
+map_Bump T_cloth_N.png
+map_Ks T_cloth_M.png
+
+newmtl MAT_METAL
+Ns 63.117920
+Ka 0.500000 0.500000 0.500000
+Kd 0.662651 0.662651 0.662651
+Ks 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 3
+map_Kd T_metal_D.png
+map_Bump T_metal_N.png
+map_Ks T_metal_M.png
+
+newmtl MAT_SWORD
+Ns 63.117920
+Ka 0.500000 0.500000 0.500000
+Kd 0.650602 0.650602 0.650602
+Ks 1.000000 1.000000 1.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 3
+map_Kd T_sword_D.png
+map_Bump T_sword_N.png
+map_Ks T_sword_M.png

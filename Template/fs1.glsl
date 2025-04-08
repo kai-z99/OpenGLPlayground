@@ -37,7 +37,7 @@ void main()
 
 vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir)
 {
-    
+    return normal;
     vec3 lightDir = normalize(light.position - fragPos);
 
     // diffuse shading

@@ -321,7 +321,7 @@ int main()
         glBindFramebuffer(GL_FRAMEBUFFER, depthMapFB); //Note, the shadowmap is based on the lights pov
         glClear(GL_DEPTH_BUFFER_BIT); //clear the depth buffer
         //glCullFace(GL_FRONT);
-
+        //
         //At this point, the depth map will be filled with the closest values from the lights pov. (After rendering)
 
         //RENDER SCENE------------------------------------------------------------------------------------------------------------
