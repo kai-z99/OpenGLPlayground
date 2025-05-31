@@ -334,9 +334,6 @@ int main()
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     //-----------------------------------------------------------------------------------------------
 
-
-
-
     //SSAO quad--------------------------
     unsigned int ssaoFBO;
     glGenFramebuffers(1, &ssaoFBO);
